@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { Link } from 'react-router-dom';
 const Navbar = () => {
   return (
     <>
@@ -17,7 +17,7 @@ const Navbar = () => {
             <span className="toggle-line" />
           </span>
         </button>
-        <a className="navbar-brand me-1 me-sm-3" href="index-2.html">
+        <Link className="navbar-brand me-1 me-sm-3" to="index-2.html">
           <div className="d-flex align-items-center">
             <img
               className="me-2"
@@ -27,7 +27,7 @@ const Navbar = () => {
             />
             <span className="font-sans-serif text-primary">falcon</span>
           </div>
-        </a>
+        </Link>
         <ul className="navbar-nav align-items-center d-none d-lg-block">
           <li className="nav-item">
             <div className="search-box" data-list='{"valueNames":["title"]}'>
@@ -61,9 +61,9 @@ const Navbar = () => {
                   <h6 className="dropdown-header fw-medium text-uppercase px-x1 fs-11 pt-0 pb-2">
                     Recently Browsed
                   </h6>
-                  <a
+                  <Link
                     className="dropdown-item fs-10 px-x1 py-1 hover-primary"
-                    href="app/events/event-detail.html"
+                    to="app/events/event-detail.html"
                   >
                     <div className="d-flex align-items-center">
                       <span className="fas fa-circle me-2 text-300 fs-11" />
@@ -76,10 +76,10 @@ const Navbar = () => {
                         Events
                       </div>
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     className="dropdown-item fs-10 px-x1 py-1 hover-primary"
-                    href="app/e-commerce/customers.html"
+                    to="app/e-commerce/customers.html"
                   >
                     <div className="d-flex align-items-center">
                       <span className="fas fa-circle me-2 text-300 fs-11" />
@@ -92,14 +92,14 @@ const Navbar = () => {
                         Customers
                       </div>
                     </div>
-                  </a>
+                  </Link>
                   <hr className="text-200 dark__text-900" />
                   <h6 className="dropdown-header fw-medium text-uppercase px-x1 fs-11 pt-0 pb-2">
                     Suggested Filter
                   </h6>
-                  <a
+                  <Link
                     className="dropdown-item px-x1 py-1 fs-9"
-                    href="app/e-commerce/customers.html"
+                    to="app/e-commerce/customers.html"
                   >
                     <div className="d-flex align-items-center">
                       <span className="badge fw-medium text-decoration-none me-2 badge-subtle-warning">
@@ -109,10 +109,10 @@ const Navbar = () => {
                         All customers list
                       </div>
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     className="dropdown-item px-x1 py-1 fs-9"
-                    href="app/events/event-detail.html"
+                    to="app/events/event-detail.html"
                   >
                     <div className="d-flex align-items-center">
                       <span className="badge fw-medium text-decoration-none me-2 badge-subtle-success">
@@ -122,10 +122,10 @@ const Navbar = () => {
                         Latest events in current month
                       </div>
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     className="dropdown-item px-x1 py-1 fs-9"
-                    href="app/e-commerce/product/product-grid.html"
+                    to="app/e-commerce/product/product-grid.html"
                   >
                     <div className="d-flex align-items-center">
                       <span className="badge fw-medium text-decoration-none me-2 badge-subtle-info">
@@ -135,12 +135,12 @@ const Navbar = () => {
                         Most popular products
                       </div>
                     </div>
-                  </a>
+                  </Link>
                   <hr className="text-200 dark__text-900" />
                   <h6 className="dropdown-header fw-medium text-uppercase px-x1 fs-11 pt-0 pb-2">
                     Files
                   </h6>
-                  <a className="dropdown-item px-x1 py-2" href="#!">
+                  <Link className="dropdown-item px-x1 py-2" to="#!">
                     <div className="d-flex align-items-center">
                       <div className="file-thumbnail me-2">
                         <img
@@ -159,8 +159,8 @@ const Navbar = () => {
                         </p>
                       </div>
                     </div>
-                  </a>
-                  <a className="dropdown-item px-x1 py-2" href="#!">
+                  </Link>
+                  <Link className="dropdown-item px-x1 py-2" to="#!">
                     <div className="d-flex align-items-center">
                       <div className="file-thumbnail me-2">
                         <img
@@ -179,14 +179,14 @@ const Navbar = () => {
                         </p>
                       </div>
                     </div>
-                  </a>
+                  </Link>
                   <hr className="text-200 dark__text-900" />
                   <h6 className="dropdown-header fw-medium text-uppercase px-x1 fs-11 pt-0 pb-2">
                     Members
                   </h6>
-                  <a
+                  <Link
                     className="dropdown-item px-x1 py-2"
-                    href="pages/user/profile.html"
+                    to="pages/user/profile.html"
                   >
                     <div className="d-flex align-items-center">
                       <div className="avatar avatar-l status-online me-2">
@@ -201,10 +201,10 @@ const Navbar = () => {
                         <p className="fs-11 mb-0 d-flex">Technext Limited</p>
                       </div>
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     className="dropdown-item px-x1 py-2"
-                    href="pages/user/profile.html"
+                    to="pages/user/profile.html"
                   >
                     <div className="d-flex align-items-center">
                       <div className="avatar avatar-l me-2">
@@ -219,10 +219,10 @@ const Navbar = () => {
                         <p className="fs-11 mb-0 d-flex">Brain Trust</p>
                       </div>
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     className="dropdown-item px-x1 py-2"
-                    href="pages/user/profile.html"
+                    to="pages/user/profile.html"
                   >
                     <div className="d-flex align-items-center">
                       <div className="avatar avatar-l me-2">
@@ -237,7 +237,7 @@ const Navbar = () => {
                         <p className="fs-11 mb-0 d-flex">Google</p>
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 </div>
                 <div className="text-center mt-n3">
                   <p className="fallback fw-bold fs-8 d-none">
@@ -251,9 +251,9 @@ const Navbar = () => {
         <ul className="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center">
           <li className="nav-item ps-2 pe-0">
             <div className="dropdown theme-control-dropdown">
-              <a
+              <Link
                 className="nav-link d-flex align-items-center dropdown-toggle fa-icon-wait fs-9 pe-1 py-0"
-                href="#"
+                to="#"
                 role="button"
                 id="themeSwitchDropdown"
                 data-bs-toggle="dropdown"
@@ -275,7 +275,7 @@ const Navbar = () => {
                   data-fa-transform="shrink-2"
                   data-theme-dropdown-toggle-icon="auto"
                 />
-              </a>
+              </Link>
               <div
                 className="dropdown-menu dropdown-menu-end dropdown-caret border py-0 mt-3"
                 aria-labelledby="themeSwitchDropdown"
@@ -316,9 +316,9 @@ const Navbar = () => {
             </div>
           </li>
           <li className="nav-item d-none d-sm-block">
-            <a
+            <Link
               className="nav-link px-0 notification-indicator notification-indicator-warning notification-indicator-fill fa-icon-wait"
-              href="app/e-commerce/shopping-cart.html"
+              to="app/e-commerce/shopping-cart.html"
             >
               <span
                 className="fas fa-shopping-cart"
@@ -326,10 +326,10 @@ const Navbar = () => {
                 style={{ fontSize: 33 }}
               />
               <span className="notification-indicator-number">1</span>
-            </a>
+            </Link>
           </li>
           <li className="nav-item dropdown">
-            <a
+            <Link
               className="nav-link notification-indicator notification-indicator-primary px-0 fa-icon-wait"
               id="navbarDropdownNotification"
               role="button"
@@ -343,7 +343,7 @@ const Navbar = () => {
                 data-fa-transform="shrink-6"
                 style={{ fontSize: 33 }}
               />
-            </a>
+            </Link>
             <div
               className="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-menu-notification dropdown-caret-bg"
               aria-labelledby="navbarDropdownNotification"
@@ -355,9 +355,9 @@ const Navbar = () => {
                       <h6 className="card-header-title mb-0">Notifications</h6>
                     </div>
                     <div className="col-auto ps-0 ps-sm-3">
-                      <a className="card-link fw-normal" href="#">
+                      <Link className="card-link fw-normal" to="#">
                         Mark all as read
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -368,9 +368,9 @@ const Navbar = () => {
                   <div className="list-group list-group-flush fw-normal fs-10">
                     <div className="list-group-title border-bottom">NEW</div>
                     <div className="list-group-item">
-                      <a
+                      <Link
                         className="notification notification-flush notification-unread"
-                        href="#!"
+                        to="#!"
                       >
                         <div className="notification-avatar">
                           <div className="avatar avatar-2xl me-3">
@@ -397,12 +397,12 @@ const Navbar = () => {
                             Just now
                           </span>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                     <div className="list-group-item">
-                      <a
+                      <Link
                         className="notification notification-flush notification-unread"
-                        href="#!"
+                        to="#!"
                       >
                         <div className="notification-avatar">
                           <div className="avatar avatar-2xl me-3">
@@ -421,13 +421,13 @@ const Navbar = () => {
                             9hr
                           </span>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                     <div className="list-group-title border-bottom">
                       EARLIER
                     </div>
                     <div className="list-group-item">
-                      <a className="notification notification-flush" href="#!">
+                      <Link className="notification notification-flush" to="#!">
                         <div className="notification-avatar">
                           <div className="avatar avatar-2xl me-3">
                             <img
@@ -453,12 +453,12 @@ const Navbar = () => {
                             1d
                           </span>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                     <div className="list-group-item">
-                      <a
+                      <Link
                         className="border-bottom-0 notification-unread  notification notification-flush"
-                        href="#!"
+                        to="#!"
                       >
                         <div className="notification-avatar">
                           <div className="avatar avatar-xl me-3">
@@ -485,12 +485,12 @@ const Navbar = () => {
                             1w
                           </span>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                     <div className="list-group-item">
-                      <a
+                      <Link
                         className="border-bottom-0 notification notification-flush"
-                        href="#!"
+                        to="#!"
                       >
                         <div className="notification-avatar">
                           <div className="avatar avatar-xl me-3">
@@ -517,23 +517,23 @@ const Navbar = () => {
                             2d
                           </span>
                         </div>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
                 <div className="card-footer text-center border-top">
-                  <a
+                  <Link
                     className="card-link d-block"
-                    href="app/social/notifications.html"
+                    to="app/social/notifications.html"
                   >
                     View all
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
           </li>
           <li className="nav-item dropdown px-1">
-            <a
+            <Link
               className="nav-link fa-icon-wait nine-dots p-1"
               id="navbarDropdownMenu"
               role="button"
@@ -559,7 +559,7 @@ const Navbar = () => {
                 <circle cx={8} cy={2} r={2} fill="#6C6E71" />
                 <circle cx={14} cy={2} r={2} fill="#6C6E71" />
               </svg>
-            </a>
+            </Link>
             <div
               className="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-caret-bg"
               aria-labelledby="navbarDropdownMenu"
@@ -569,9 +569,9 @@ const Navbar = () => {
                   <div className="card-body px-3">
                     <div className="row text-center gx-0 gy-0">
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="pages/user/profile.html"
+                          to="pages/user/profile.html"
                           target="_blank"
                         >
                           <div className="avatar avatar-2xl">
@@ -585,12 +585,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11">
                             Account
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="https://themewagon.com/"
+                          to="https://themewagon.com/"
                           target="_blank"
                         >
                           <img
@@ -603,12 +603,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Themewagon
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="https://mailbluster.com/"
+                          to="https://mailbluster.com/"
                           target="_blank"
                         >
                           <img
@@ -621,12 +621,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Mailbluster
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -639,12 +639,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Google
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -657,12 +657,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Spotify
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -675,12 +675,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Steam
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -693,12 +693,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Github
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -711,12 +711,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Discord
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -729,12 +729,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             xbox
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -747,12 +747,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Kanban
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -765,15 +765,15 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Hp
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-12">
                         <hr className="my-3 mx-n3 bg-200" />
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -786,12 +786,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Linkedin
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -804,12 +804,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Twitter
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -822,12 +822,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Facebook
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -840,12 +840,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Instagram
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -858,12 +858,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Pinterest
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -876,12 +876,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Slack
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="#!"
+                          to="#!"
                           target="_blank"
                         >
                           <img
@@ -894,12 +894,12 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11 pt-1">
                             Deviantart
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-4">
-                        <a
+                        <Link
                           className="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none"
-                          href="app/events/event-detail.html"
+                          to="app/events/event-detail.html"
                           target="_blank"
                         >
                           <div className="avatar avatar-2xl">
@@ -910,15 +910,15 @@ const Navbar = () => {
                           <p className="mb-0 fw-medium text-800 text-truncate fs-11">
                             Events
                           </p>
-                        </a>
+                        </Link>
                       </div>
                       <div className="col-12">
-                        <a
+                        <Link
                           className="btn btn-outline-primary btn-sm mt-4"
-                          href="#!"
+                          to="#!"
                         >
                           Show more
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -927,7 +927,7 @@ const Navbar = () => {
             </div>
           </li>
           <li className="nav-item dropdown">
-            <a
+            <Link
               className="nav-link pe-0 ps-2"
               id="navbarDropdownUser"
               role="button"
@@ -942,36 +942,36 @@ const Navbar = () => {
                   alt=""
                 />
               </div>
-            </a>
+            </Link>
             <div
               className="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end py-0"
               aria-labelledby="navbarDropdownUser"
             >
               <div className="bg-white dark__bg-1000 rounded-2 py-2">
-                <a className="dropdown-item fw-bold text-warning" href="#!">
+                <Link className="dropdown-item fw-bold text-warning" to="#!">
                   <span className="fas fa-crown me-1" />
                   <span>Go Pro</span>
-                </a>
+                </Link>
                 <div className="dropdown-divider" />
-                <a className="dropdown-item" href="#!">
+                <Link className="dropdown-item" to="#!">
                   Set status
-                </a>
-                <a className="dropdown-item" href="pages/user/profile.html">
+                </Link>
+                <Link className="dropdown-item" to="pages/user/profile.html">
                   Profile &amp; account
-                </a>
-                <a className="dropdown-item" href="#!">
+                </Link>
+                <Link className="dropdown-item" to="#!">
                   Feedback
-                </a>
+                </Link>
                 <div className="dropdown-divider" />
-                <a className="dropdown-item" href="pages/user/settings.html">
+                <Link className="dropdown-item" to="pages/user/settings.html">
                   Settings
-                </a>
-                <a
+                </Link>
+                <Link
                   className="dropdown-item"
-                  href="pages/authentication/card/logout.html"
+                  to="pages/authentication/card/logout.html"
                 >
                   Logout
-                </a>
+                </Link>
               </div>
             </div>
           </li>
