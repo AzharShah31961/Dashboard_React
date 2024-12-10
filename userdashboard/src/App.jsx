@@ -4,6 +4,9 @@ import Home from "./Pages/Home" ;// Ensure Home component is correctly imported
 import Adminread from "./Pages/Adminread";
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
+import Roleread from "./Pages/Roleread";
+import Staffread from "./Pages/Staffread";
+import Guestread from "./Pages/Guestread";
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +26,9 @@ function App() {
 
         <Route path="/" element={<Home />} />
         <Route path="/Adminread" element={<Adminread />} />
+        <Route path="/Roleread" element={<Roleread />} />
+        <Route path="/Staffread" element={<Staffread />} />
+        <Route path="/Guestread" element={<Guestread />} />
         
       </Routes>
       </div>
