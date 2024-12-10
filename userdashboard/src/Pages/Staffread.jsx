@@ -141,7 +141,7 @@ const Staffread = () => {
     if (member) {
       setIsUpdate(true);
       setStaffData({
-        ...member,  // Spread the member data
+        ...member, // Spread the member data
         role: member.role?._id || "", // Ensure the role is correctly set from the member data
       });
     } else {
@@ -152,11 +152,12 @@ const Staffread = () => {
         phone: "",
         cnic: "",
         password: "",
-        role: "",  // Reset role for adding new staff
+        role: "",
       });
     }
     setIsModalOpen(true); // Show modal
   };
+  
   const opendetailModal = (member = null) => {
     if (member) {
       setIsUpdate(false); // Set to false for view mode
@@ -177,6 +178,7 @@ const Staffread = () => {
     }
     setIsModalOpen(true); // Show modal
   };
+  
   
   return (
     <>
@@ -290,140 +292,21 @@ const Staffread = () => {
       {/* Modal for adding or updating staff */}
     {/* Modal for adding or updating staff */}
     {isModalOpen && (
-      <div className="modal show" style={{ display: "block" }}>
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
-                {isUpdate ? "Update Staff" : "Add New Staff"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setIsModalOpen(false)}
-              ></button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={isUpdate ? updateStaff : addStaff}>
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="username"
-                    name="username"
-                    value={staffData.username}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    name="email"
-                    value={staffData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="phone" className="form-label">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="phone"
-                    name="phone"
-                    value={staffData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="cnic" className="form-label">
-                    CNIC
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="cnic"
-                    name="cnic"
-                    value={staffData.cnic}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                {!isUpdate && (
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      name="password"
-                      value={staffData.password}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                )}
-                <div className="mb-3">
-                  <label htmlFor="role" className="form-label">
-                    Role
-                  </label>
-                  <select
-                    className="form-control"
-                    id="role"
-                    name="role"
-                    value={staffData.role} // Ensure the selected role is set here
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Role</option>
-                    {roles.map((role) => (
-                      <option key={role._id} value={role._id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-primary">
-                  {isUpdate ? "Update Staff" : "Add Staff"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-    <ToastContainer position="top-center" autoClose={3000} />
-
-    {isModalOpen && (
   <div className="modal show" style={{ display: "block" }}>
     <div className="modal-dialog">
       <div className="modal-content">
         <div className="modal-header">
           <h5 className="modal-title">
-            {isUpdate ? "Update Staff" : "View Staff"} {/* Update the title */}
+            {isUpdate ? "Update Staff" : "View Staff"} {/* Update title dynamically */}
           </h5>
           <button
             type="button"
             className="btn-close"
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => setIsModalOpen(false)} // Close modal
           ></button>
         </div>
         <div className="modal-body">
-          <form>
+          <form onSubmit={isUpdate ? updateStaff : null}>
             <div className="mb-3">
               <label htmlFor="username" className="form-label">
                 Username
@@ -435,7 +318,7 @@ const Staffread = () => {
                 name="username"
                 value={staffData.username}
                 onChange={handleChange}
-                readOnly
+                readOnly={!isUpdate} // Read-only in View mode
               />
             </div>
             <div className="mb-3">
@@ -449,7 +332,7 @@ const Staffread = () => {
                 name="email"
                 value={staffData.email}
                 onChange={handleChange}
-                readOnly
+                readOnly={!isUpdate} // Read-only in View mode
               />
             </div>
             <div className="mb-3">
@@ -463,8 +346,7 @@ const Staffread = () => {
                 name="phone"
                 value={staffData.phone}
                 onChange={handleChange}
-                readOnly // Only editable in update mode
-                
+                readOnly={!isUpdate} // Read-only in View mode
               />
             </div>
             <div className="mb-3">
@@ -478,11 +360,10 @@ const Staffread = () => {
                 name="cnic"
                 value={staffData.cnic}
                 onChange={handleChange}
-                readOnly // Only editable in update mode
-                required
+                readOnly={!isUpdate} // Read-only in View mode
               />
             </div>
-            
+
             <div className="mb-3">
               <label htmlFor="role" className="form-label">
                 Role
@@ -491,8 +372,10 @@ const Staffread = () => {
                 className="form-control"
                 id="role"
                 name="role"
-                readOnly
-                
+                value={staffData.role}
+                onChange={handleChange}
+                disabled={!isUpdate} // Disabled in View mode
+                required
               >
                 <option value="">Select Role</option>
                 {roles.map((role) => (
@@ -502,10 +385,13 @@ const Staffread = () => {
                 ))}
               </select>
             </div>
+
             {isUpdate && (
-              <button type="submit" className="btn btn-primary">
-                {isUpdate ? "Update Staff" : "Add Staff"}
-              </button>
+              <div className="mb-3">
+                <button type="submit" className="btn btn-primary">
+                  Update Staff
+                </button>
+              </div>
             )}
           </form>
         </div>
