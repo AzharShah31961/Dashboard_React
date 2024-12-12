@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify"; // Import the required CSS for toast notifications
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
+
 
 const Adminread = () => {
   const [users, setUsers] = useState([]);
@@ -13,13 +15,14 @@ const Adminread = () => {
     phone: "",
     password: "",
   });
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-  const [isUpdate, setIsUpdate] = useState(false); // Whether the modal is for adding or updating
+  const [isModalOpen, setIsModalOpen] = useState(false); // Add/Update modal
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false); // View modal
+  const [isUpdate, setIsUpdate] = useState(false); // Track if the modal is for update
 
-  // Fetch users data from the backend
+  // Fetch users data
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/admin");
+      const response = await axios.get("http://localhost:5000/api/admin/");
       setUsers(response.data);
       setLoading(false);
     } catch (error) {
@@ -30,213 +33,146 @@ const Adminread = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []); // Initial load
+  }, []);
 
   // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUserData({ ...userData, [name]: value });
-  };
+// Handle input changes
+const handleChange = (e) => {
+  const { name, value } = e.target;
 
-  // Submit the form to add new admin
+  if (name === "phone" && value.length > 11) {
+    return; // Prevent updating if phone exceeds 10 digits
+  }
+
+  setUserData({ ...userData, [name]: value });
+};
+
+
+  // Submit to add new admin
   const handleAddAdmin = async (e) => {
     e.preventDefault();
-    console.log("Sending Data:", userData);
-
+  
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/admin/create",
-        userData
-      );
-
-      // Show success toast (Android-like appearance)
-      toast.success("Admin added successfully!", {
-        className: "toast-success",
-        position: "bottom-center",
-        autoClose: 3000, // Auto close after 3 seconds
-        hideProgressBar: true, // Hide progress bar
-        closeOnClick: true, // Close on click
-        draggable: true, // Draggable toast
-      });
-
-      // Reset the form fields after successful submission
+      // Convert username and email to lowercase for case-insensitive handling
+      const preparedUserData = {
+        ...userData,
+        username: userData.username.trim().toLowerCase(),
+        email: userData.email.trim().toLowerCase(),
+      };
+  
+      // Send request to the server to add the new admin
+      await axios.post("http://localhost:5000/api/admin/create", preparedUserData);
+      toast.success("Admin added successfully!");
+  
+      // Reset the form fields
       setUserData({ username: "", email: "", phone: "", password: "" });
-
-      // Refresh the user list after adding the admin
+  
+      // Refresh the user list
       fetchUsers();
-
-      // Close the modal by setting modal visibility state to false
+  
+      // Close the modal
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error:", error);
-
-      // Show error toast (Android-like appearance)
-      let errorMessage = "An error occurred!";
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        errorMessage = error.response.data.message;
+      if (error.response && error.response.data) {
+        // Display the specific error message from the server
+        toast.error(error.response.data.message || "Failed to add admin.");
+      } else {
+        console.error("Error adding admin:", error);
+        toast.error("Failed to add admin.");
       }
-
-      toast.error(errorMessage, {
-        className: "toast-error",
-        position: "bottom-center",
-        autoClose: 3000, // Auto close after 3 seconds
-        hideProgressBar: true, // Hide progress bar
-        closeOnClick: true, // Close on click
-        draggable: true, // Draggable toast
-      });
     }
   };
+  
 
- const handleUpdateAdmin = async (e) => {
-   e.preventDefault();
-
-   try {
-     // Convert all fields to lowercase
-     const { _id, ...dataToUpdate } = userData;
-     const secureData = {
-       username: dataToUpdate.username.toLowerCase(),
-       email: dataToUpdate.email.toLowerCase(),
-       phone: dataToUpdate.phone.toLowerCase(),
-       password: dataToUpdate.password, // Password shouldn't be modified here
-     };
-
-     // Check if the data already exists (fetch existing users)
-     const response = await axios.get("http://localhost:5000/api/admin");
-     const existingUser = response.data.find(
-       (user) =>
-         user._id !== _id && // Exclude the current user
-         (user.username === secureData.username ||
-           user.email === secureData.email ||
-           user.phone === secureData.phone)
-     );
-
-     if (existingUser) {
-       // Show error toast if data already exists
-       toast.error("User with the same data already exists!", {
-         className: "toast-error",
-         position: "bottom-center",
-         autoClose: 3000,
-         hideProgressBar: true,
-         closeOnClick: true,
-         draggable: true,
-       });
-       return;
-     }
-
-     // Perform the update operation
-     const updateResponse = await axios.put(
-       `http://localhost:5000/api/admin/update/${_id}`,
-       secureData
-     );
-
-     // Show success toast
-     toast.success("Admin updated successfully!", {
-       className: "toast-success",
-       position: "bottom-center",
-       autoClose: 3000,
-       hideProgressBar: true,
-       closeOnClick: true,
-       draggable: true,
-     });
-
-     // Reset the form fields after successful submission
-     setUserData({ username: "", email: "", phone: "", password: "" });
-
-     // Refresh the user list after updating the admin
-     fetchUsers();
-
-     // Close the modal by setting modal visibility state to false
-     setIsModalOpen(false);
-   } catch (error) {
-     console.error("Error:", error);
-
-     // Show error toast
-     let errorMessage = "An error occurred!";
-     if (error.response && error.response.data && error.response.data.message) {
-       errorMessage = error.response.data.message;
-     }
-
-     toast.error(errorMessage, {
-       className: "toast-error",
-       position: "bottom-center",
-       autoClose: 3000,
-       hideProgressBar: true,
-       closeOnClick: true,
-       draggable: true,
-     });
-   }
- };
-
-
-  // Handle the delete functionality
+  const handleUpdateAdmin = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const { _id, __v, password, ...updatedData } = userData;
+  
+      // Normalize username and email to lowercase
+      const preparedUserData = {
+        ...updatedData,
+        username: updatedData.username.trim().toLowerCase(),
+        email: updatedData.email.trim().toLowerCase(),
+      };
+  
+      // Check for duplicates in the existing users (excluding the current user)
+      const duplicateUser = users.find(
+        (user) =>
+          user._id !== _id &&
+          (user.username === preparedUserData.username ||
+           user.email === preparedUserData.email)
+      );
+  
+      if (duplicateUser) {
+        toast.error("A user with the same username or email already exists.");
+        return;
+      }
+  
+      // Include password only if it has a value
+      if (password) {
+        preparedUserData.password = password;
+      }
+  
+      // Send request to the server to update the admin
+      await axios.put(`http://localhost:5000/api/admin/update/${_id}`, preparedUserData);
+      toast.success("Admin updated successfully!");
+  
+      // Reset the form fields
+      setUserData({ username: "", email: "", phone: "", password: "" });
+  
+      // Refresh the user list
+      fetchUsers();
+  
+      // Close the modal
+      setIsModalOpen(false);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        // Display the specific error message from the server
+        toast.error(error.response.data.message || "Failed to update admin.");
+      } else {
+        console.error("Error updating admin:", error);
+        toast.error("Failed to update admin.");
+      }
+    }
+  };
+  
+  
+  
+  
+  // Handle delete
   const handleDelete = async (userId) => {
-    // Confirmation before deleting
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
-    if (confirmDelete) {
+    if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await axios.delete(`http://localhost:5000/api/admin/delete/${userId}`);
-
-        // Show success toast
-        toast.success("User deleted successfully!", {
-          className: "toast-success",
-          position: "bottom-center",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          draggable: true,
-        });
-
-        // Remove the user from the list
+        toast.success("User deleted successfully!");
         setUsers(users.filter((user) => user._id !== userId));
       } catch (error) {
         console.error("Error deleting user:", error);
-
-        // Show error toast
-        let errorMessage = "An error occurred while deleting the user!";
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        ) {
-          errorMessage = error.response.data.message;
-        }
-
-        toast.error(errorMessage, {
-          className: "toast-error",
-          position: "bottom-center",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          draggable: true,
-        });
+        toast.error("Failed to delete user.");
       }
     }
   };
 
-  // Open modal for adding a new admin
+  // Open modal to add new admin
   const openAddModal = () => {
     setIsUpdate(false);
-    setUserData({ username: "", email: "", phone: "", password: "" }); // Reset form fields
+    setUserData({ username: "", email: "", phone: "", password: "" });
     setIsModalOpen(true);
   };
 
-  // Open modal for updating an existing admin
+  // Open modal to update admin
   const openUpdateModal = (user) => {
     setIsUpdate(true);
-    setUserData({
-      _id: user._id, // Fetch the _id here from the user data
-      username: user.username,
-      email: user.email,
-      phone: user.phone,
-      password: "", // Password should remain empty during update, unless it's to be changed
-    });
+    setUserData({ ...user, password: "" });
     setIsModalOpen(true);
+  };
+
+  // Open modal to view admin details
+  const openViewModal = (user) => {
+    setUserData(user);
+    setIsViewModalOpen(true);
   };
 
   return (
@@ -251,7 +187,7 @@ const Adminread = () => {
               <button
                 className="btn btn-falcon-default btn-sm"
                 type="button"
-                onClick={openAddModal} // Open the modal to add new admin
+                onClick={openAddModal}
               >
                 <span className="fas fa-plus" />
                 <span className="d-none d-sm-inline-block ms-1">New</span>
@@ -288,9 +224,7 @@ const Adminread = () => {
                       <td>{user.email}</td>
                       <td>{user.phone}</td>
                       <td>
-                        <span className="badge badge-subtle-success">
-                          Active
-                        </span>
+                        <span className="badge badge-subtle-success">Active</span>
                       </td>
                       <td className="py-2 align-middle white-space-nowrap text-end">
                         <div className="dropdown font-sans-serif position-static">
@@ -310,28 +244,28 @@ const Adminread = () => {
                             aria-labelledby="order-dropdown-0"
                           >
                             <div className="py-2">
-                              <a
+                              <Link
                                 className="dropdown-item"
-                                href="#!"
+                       
                                 onClick={() => openUpdateModal(user)} // Open update modal
                               >
                                 Update
-                              </a>
-                              <a
+                              </Link>
+                              <Link
                                 className="dropdown-item"
-                                href="#!"
-                                
+              
+                                onClick={() => openViewModal(user)}
                               >
                                 View
-                              </a>
+                              </Link>
                               <div className="dropdown-divider"></div>
-                              <a
+                              <Link
                                 className="dropdown-item text-danger"
-                                href="#!"
+
                                 onClick={() => handleDelete(user._id)} // Delete user on click
                               >
                                 Delete
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -351,27 +285,19 @@ const Adminread = () => {
         </div>
       </div>
 
-      {/* Bootstrap Modal for adding or updating admin */}
+      {/* Add/Update Modal */}
       {isModalOpen && (
-        <div
-          className="modal fade show"
-          id="addAdminModal"
-          tabIndex="-1"
-          aria-labelledby="addAdminModalLabel"
-          aria-hidden="true"
-          style={{ display: "block" }} // Manually control visibility
-        >
+        <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="addAdminModalLabel">
+                <h5 className="modal-title">
                   {isUpdate ? "Update Admin" : "Add New Admin"}
                 </h5>
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setIsModalOpen(false)} // Close modal manually
-                  aria-label="Close"
+                  onClick={() => setIsModalOpen(false)}
                 ></button>
               </div>
               <div className="modal-body">
@@ -418,20 +344,22 @@ const Adminread = () => {
                       required
                     />
                   </div>
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      name="password"
-                      value={userData.password}
-                      onChange={handleChange}
-                      required={isUpdate ? false : true} // Password required only on adding
-                    />
-                  </div>
+                  {!isUpdate && (
+                    <div className="mb-3">
+                      <label htmlFor="password" className="form-label">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        id="password"
+                        name="password"
+                        value={userData.password}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  )}
                   <button type="submit" className="btn btn-primary">
                     {isUpdate ? "Update Admin" : "Add Admin"}
                   </button>
@@ -442,8 +370,30 @@ const Adminread = () => {
         </div>
       )}
 
-      {/* ToastContainer for displaying toasts */}
-      <ToastContainer position="top-center" autoClose={5000} hideProgressBar />
+      {/* View Modal */}
+      {isViewModalOpen && (
+        <div className="modal fade show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">View Admin Details</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsViewModalOpen(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p><strong>Username:</strong> {userData.username}</p>
+                <p><strong>Email:</strong> {userData.email}</p>
+                <p><strong>Phone:</strong> {userData.phone}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer position="top-center" autoClose={3000} />
     </>
   );
 };

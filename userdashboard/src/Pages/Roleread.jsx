@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
 
 const Roleread = () => {
   const [roles, setRoles] = useState([]);
@@ -13,6 +14,7 @@ const Roleread = () => {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [viewRole, setViewRole] = useState(null); // State for viewing role details
 
   // Fetch roles from the backend
   const fetchRoles = async () => {
@@ -39,15 +41,37 @@ const Roleread = () => {
   // Add new role
   const addRole = async (e) => {
     e.preventDefault();
-    console.log("Adding role:", roleData); // Debug the roleData object
+
+    const preparedRoleData = {
+      ...roleData,
+      name: roleData.name.trim().toLowerCase(),
+    };
+
+    const alphaRegex = /^[a-zA-Z]+$/;
+    if (!alphaRegex.test(preparedRoleData.name)) {
+      toast.error("Role name must only contain alphabets.");
+      return;
+    }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/role/create", roleData);
-      console.log("Create response:", response); // Log the response
+      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
+      const existingRoles = existingRolesResponse.data;
+
+      const duplicateRole = existingRoles.find(
+        (role) => role.name === preparedRoleData.name
+      );
+
+      if (duplicateRole) {
+        toast.error("A role with the same name already exists.");
+        return;
+      }
+
+      const response = await axios.post("http://localhost:5000/api/role/create", preparedRoleData);
       toast.success("Role created successfully!");
-      fetchRoles(); // Refresh the roles list
-      setRoleData({ name: "", status: "active", limit: "" }); // Reset form
-      setIsModalOpen(false); // Close modal
+
+      fetchRoles();
+      setRoleData({ name: "", status: "active", limit: "" });
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error creating role:", error);
       toast.error("An error occurred while creating the role.");
@@ -58,21 +82,43 @@ const Roleread = () => {
   const updateRole = async (e) => {
     e.preventDefault();
   
-    // Exclude `_id` and `__v` from roleData
     const { _id, __v, ...roleUpdateData } = roleData;
   
+    // Convert role name to lowercase and trim whitespace
+    roleUpdateData.name = roleUpdateData.name.trim().toLowerCase();
+  
+    // Validate that the role name contains only alphabets
+    const alphaRegex = /^[a-zA-Z]+$/;
+    if (!alphaRegex.test(roleUpdateData.name)) {
+      toast.error("Role name must only contain alphabets (no numbers or special characters).");
+      return;
+    }
+  
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/role/update/${_id}`,
-        roleUpdateData // Send only the fields needed for update
+      // Fetch existing roles
+      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
+      const existingRoles = existingRolesResponse.data;
+  
+      // Check if a role with the same name exists (excluding the current role being updated)
+      const duplicateRole = existingRoles.find(
+        (role) => role.name === roleUpdateData.name && role._id !== _id
       );
   
-      console.log("Update response:", response.data);
-      toast.success("Role updated successfully!");
+      if (duplicateRole) {
+        toast.error("A role with the same name already exists.");
+        return;
+      }
   
-      fetchRoles(); // Refresh the roles list
+      // Send update request
+      const response = await axios.put(
+        `http://localhost:5000/api/role/update/${_id}`,
+        roleUpdateData
+      );
+  
+      toast.success("Role updated successfully!");
+      fetchRoles(); // Refresh roles
       setRoleData({ name: "", status: "active", limit: 0 }); // Reset form
-      setIsModalOpen(false); // Close the modal
+      setIsModalOpen(false); // Close modal
     } catch (error) {
       console.error("Error updating role:", error.response || error);
       toast.error(
@@ -81,9 +127,7 @@ const Roleread = () => {
     }
   };
   
-  
-  
-  
+
 
   // Delete role
   const handleDelete = async (roleId) => {
@@ -103,12 +147,22 @@ const Roleread = () => {
   const openModal = (role = null) => {
     if (role) {
       setIsUpdate(true);
-      setRoleData(role); // Set data for update
+      setRoleData(role);
     } else {
       setIsUpdate(false);
-      setRoleData({ name: "", status: "active", limit: "" }); // Reset form for new role
+      setRoleData({ name: "", status: "active", limit: "" });
     }
-    setIsModalOpen(true); // Show modal
+    setIsModalOpen(true);
+  };
+
+  // Open modal for viewing role details
+  const openViewModal = (role) => {
+    setViewRole(role);
+  };
+
+  // Close the view modal
+  const closeViewModal = () => {
+    setViewRole(null);
   };
 
   return (
@@ -123,7 +177,7 @@ const Roleread = () => {
               <button
                 className="btn btn-falcon-default btn-sm"
                 type="button"
-                onClick={() => openModal()} // Open the modal to add new role
+                onClick={() => openModal()}
               >
                 <span className="fas fa-plus" />
                 <span className="d-none d-sm-inline-block ms-1">New</span>
@@ -175,28 +229,28 @@ const Roleread = () => {
                             aria-labelledby="order-dropdown-0"
                           >
                             <div className="py-2">
-                              <a
+                              <Link
                                 className="dropdown-item"
                                 href="#!"
-                                onClick={() => openModal(role)} // Open update modal
+                                onClick={() => openModal(role)}
                               >
                                 Update
-                              </a>
-                              <a
+                              </Link>
+                              <Link
                                 className="dropdown-item"
                                 href="#!"
-                                
+                                onClick={() => openViewModal(role)} // Open view modal
                               >
                                 View
-                              </a>
+                              </Link>
                               <div className="dropdown-divider"></div>
-                              <a
+                              <Link
                                 className="dropdown-item text-danger"
                                 href="#!"
-                                onClick={() => handleDelete(role._id)} // Delete user on click
+                                onClick={() => handleDelete(role._id)}
                               >
                                 Delete
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -271,6 +325,7 @@ const Roleread = () => {
                       type="number"
                       className="form-control"
                       id="limit"
+                      min="1"
                       name="limit"
                       value={roleData.limit}
                       onChange={handleChange}
@@ -286,6 +341,36 @@ const Roleread = () => {
           </div>
         </div>
       )}
+
+      {/* Modal for viewing role details */}
+      {viewRole && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">View Role Details</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeViewModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>
+                  <strong>Name:</strong> {viewRole.name}
+                </p>
+                <p>
+                  <strong>Status:</strong> {viewRole.status}
+                </p>
+                <p>
+                  <strong>Limit:</strong> {viewRole.limit}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer position="top-center" autoClose={3000} />
     </>
   );

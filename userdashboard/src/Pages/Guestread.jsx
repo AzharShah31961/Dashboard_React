@@ -32,15 +32,53 @@ const Guestread = () => {
     fetchGuests();
   }, []);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+  
+    if (name === "phone" && value.length > 11) {
+      return; // Prevent updating if phone exceeds 10 digits
+    }
+  
     setGuestData({ ...guestData, [name]: value });
   };
 
   // Add new guest
   const addGuest = async (e) => {
     e.preventDefault();
+  
+    // Validate name (only alphabets)
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(guestData.name)) {
+      toast.error("Name must contain only alphabets.");
+      return;
+    }
+  
+    // Validate phone (exactly 11 digits)
+    if (guestData.phone.length !== 11) {
+      toast.error("Phone number must be exactly 11 digits.");
+      return;
+    }
+  
+    // Validate document number based on selected document type
+    if (guestData.documenttype === "cnic") {
+      if (!/^\d+$/.test(guestData.documentno)) {
+        toast.error("CNIC number must contain only digits.");
+        return;
+      }
+      if (guestData.documentno.length != 13 || guestData.documentno.length >= 13) {
+        toast.error("CNIC number must be 13 digits.");
+        return;
+      }
+    } else if (guestData.documenttype === "passport") {
+      if (guestData.documentno.length < 6 || guestData.documentno.length > 10) {
+        toast.error("Passport number must be between 6 and 10 characters.");
+        return;
+      }
+    } else {
+      toast.error("Please select a valid document type.");
+      return;
+    }
+  
     try {
       const response = await axios.post("http://localhost:5000/api/guest/create", guestData);
       toast.success("Guest created successfully!");
@@ -57,12 +95,47 @@ const Guestread = () => {
       toast.error("An error occurred while creating the guest.");
     }
   };
+  
 
   // Update existing guest
   const updateGuest = async (e) => {
     e.preventDefault();
-    const { _id, __v, ...guestUpdateData } = guestData; // Exclude `_id`
+  
+    // Validate name (only alphabets)
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(guestData.name)) {
+      toast.error("Name must contain only alphabets.");
+      return;
+    }
+  
+    // Validate phone (exactly 11 digits)
+    if (guestData.phone.length !== 11) {
+      toast.error("Phone number must be exactly 11 digits.");
+      return;
+    }
+  
+    // Validate document number based on selected document type
+    if (guestData.documenttype === "cnic") {
+      if (!/^\d+$/.test(guestData.documentno)) {
+        toast.error("CNIC number must contain only digits.");
+        return;
+      }
+      if (guestData.documentno.length != 13 ||guestData.documentno.length <= 13) {
+        toast.error("CNIC number must be  13 digits.");
+        return;
+      }
+    } else if (guestData.documenttype === "passport") {
+      if (guestData.documentno.length < 6 || guestData.documentno.length > 10) {
+        toast.error("Passport number must be between 6 and 10 characters.");
+        return;
+      }
+    } else {
+      toast.error("Please select a valid document type.");
+      return;
+    }
+  
     try {
+      const { _id, __v, ...guestUpdateData } = guestData; // Exclude `_id`
       const response = await axios.put(`http://localhost:5000/api/guest/update/${_id}`, guestUpdateData);
       toast.success("Guest updated successfully!");
       fetchGuests(); // Refresh the guest list
@@ -78,6 +151,7 @@ const Guestread = () => {
       toast.error("An error occurred while updating the guest.");
     }
   };
+  
 
   // Delete guest
   const handleDelete = async (guestId) => {
