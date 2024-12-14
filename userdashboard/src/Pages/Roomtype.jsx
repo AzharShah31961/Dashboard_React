@@ -4,181 +4,166 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 
-const Roleread = () => {
-  const [roles, setRoles] = useState([]);
+const Roomtype = () => {
+  const [roomtypes, setRoomtypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [roleData, setRoleData] = useState({
-    name: "",
-    status: "active",
-    limit: 0,
+  const [roomtypeData, setRoomtypeData] = useState({
+    type: "",
+    halfdayprice: "",
+    fulldayprice: "",
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [viewRole, setViewRole] = useState(null); // State for viewing role details
+  const [viewRoomtype, setViewRoomtype] = useState(null); // State for viewing roomtype details
 
-  // Fetch roles from the backend
-  const fetchRoles = async () => {
+  // Fetch roomtypes from the backend
+  const fetchRoomtypes = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/role/");
-      setRoles(response.data);
+      const response = await axios.get("http://localhost:5000/api/roomtype/");
+      setRoomtypes(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      console.error("Error fetching roomtypes:", error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRoles();
+    fetchRoomtypes();
   }, []);
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRoleData({ ...roleData, [name]: value });
+    setRoomtypeData({ ...roomtypeData, [name]: value });
   };
 
-  // Add new role
-  const addRole = async (e) => {
+  // Add new roomtype
+  const addRoomtype = async (e) => {
     e.preventDefault();
 
-    const preparedRoleData = {
-      ...roleData,
-      name: roleData.name.trim().toLowerCase(),
+    const preparedRoomtypeData = {
+      ...roomtypeData,
+      type: roomtypeData.type.trim(),
     };
 
-    const alphaRegex = /^[a-zA-Z]+$/;
-    if (!alphaRegex.test(preparedRoleData.name)) {
-      toast.error("Role name must only contain alphabets.");
-      return;
-    }
-
     try {
-      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
-      const existingRoles = existingRolesResponse.data;
+      const existingRoomtypesResponse = await axios.get(
+        "http://localhost:5000/api/roomtype/"
+      );
+      const existingRoomtypes = existingRoomtypesResponse.data;
 
-      const duplicateRole = existingRoles.find(
-        (role) => role.name === preparedRoleData.name
+      const duplicateRoomtype = existingRoomtypes.find(
+        (roomtype) => roomtype.type === preparedRoomtypeData.type
       );
 
-      if (duplicateRole) {
-        toast.error("A role with the same name already exists.");
+      if (duplicateRoomtype) {
+        toast.error("A roomtype with the same name already exists.");
         return;
       }
 
-      const response = await axios.post("http://localhost:5000/api/role/create", preparedRoleData);
-      toast.success("Role created successfully!");
+      const response = await axios.post(
+        "http://localhost:5000/api/roomtype/create",
+        preparedRoomtypeData
+      );
+      toast.success("Roomtype created successfully!");
 
-      fetchRoles();
-      setRoleData({ name: "", status: "active", limit: "" });
+      fetchRoomtypes();
+      setRoomtypeData({ type: "", halfdayprice: "", fulldayprice: "" });
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error creating role:", error);
-      toast.error("An error occurred while creating the role.");
+      console.error("Error creating roomtype:", error);
+      toast.error("An error occurred while creating the roomtype.");
     }
   };
 
-  // Update existing role
-  const updateRole = async (e) => {
+  // Update existing roomtype
+  const updateRoomtype = async (e) => {
     e.preventDefault();
-  
-    const { _id, __v, ...roleUpdateData } = roleData;
-  
-    // Convert role name to lowercase and trim whitespace
-    roleUpdateData.name = roleUpdateData.name.trim().toLowerCase();
-  
-    // Validate that the role name contains only alphabets
-    const alphaRegex = /^[a-zA-Z]+$/;
-    if (!alphaRegex.test(roleUpdateData.name)) {
-      toast.error("Role name must only contain alphabets (no numbers or special characters).");
-      return;
-    }
-  
+
+    const { _id, __v, ...roomtypeUpdateData } = roomtypeData;
+
+    // Validate that the roomtype type contains no special characters
+    roomtypeUpdateData.type = roomtypeUpdateData.type.trim();
+
     try {
-      // Fetch existing roles
-      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
-      const existingRoles = existingRolesResponse.data;
-  
-      // Check if a role with the same name exists (excluding the current role being updated)
-      const duplicateRole = existingRoles.find(
-        (role) => role.name === roleUpdateData.name && role._id !== _id
+      const existingRoomtypesResponse = await axios.get(
+        "http://localhost:5000/api/roomtype/"
       );
-  
-      if (duplicateRole) {
-        toast.error("A role with the same name already exists.");
+      const existingRoomtypes = existingRoomtypesResponse.data;
+
+      const duplicateRoomtype = existingRoomtypes.find(
+        (roomtype) =>
+          roomtype.type === roomtypeUpdateData.type && roomtype._id !== _id
+      );
+
+      if (duplicateRoomtype) {
+        toast.error("A roomtype with the same name already exists.");
         return;
       }
-  
-      // Send update request
+
       const response = await axios.put(
-        `http://localhost:5000/api/role/update/${_id}`,
-        roleUpdateData
+        `http://localhost:5000/api/roomtype/update/${_id}`,
+        roomtypeUpdateData
       );
-  
-      toast.success("Role updated successfully!");
-      fetchRoles(); // Refresh roles
-      setRoleData({ name: "", status: "active", limit: 0 }); // Reset form
+
+      toast.success("Roomtype updated successfully!");
+      fetchRoomtypes(); // Refresh roomtypes
+      setRoomtypeData({ type: "", halfdayprice: "", fulldayprice: "" }); // Reset form
       setIsModalOpen(false); // Close modal
     } catch (error) {
-      console.error("Error updating role:", error.response || error);
-      toast.error(
-        error.response?.data?.message || "An error occurred while updating the role."
-      );
+      console.error("Error updating roomtype:", error);
+      toast.error("An error occurred while updating the roomtype.");
     }
   };
-  
 
+  // Delete roomtype
+  const handleDelete = async (roomtypeId) => {
+    if (window.confirm("Are you sure you want to delete this roomtype?")) {
+      try {
+        await axios.delete(
+          `http://localhost:5000/api/roomtype/delete/${roomtypeId}`
+        );
+        toast.success("Roomtype deleted successfully!");
+        setRoomtypes(
+          roomtypes.filter((roomtype) => roomtype._id !== roomtypeId)
+        );
+      } catch (error) {
+        console.error("Error deleting roomtype:", error);
+        toast.error("An error occurred while deleting the roomtype.");
+      }
+    }
+  };
 
-  // Delete role
- const handleDelete = async (roleId) => {
-   if (window.confirm("Are you sure you want to delete this role?")) {
-     try {
-       await axios.delete(`http://localhost:5000/api/role/delete/${roleId}`);
-       toast.success("Role deleted successfully!");
-       setRoles(roles.filter((role) => role._id !== roleId));
-     } catch (error) {
-       if (error.response && error.response.status === 400) {
-         toast.error(
-           "This role is currently assigned to a staff member and cannot be deleted."
-         );
-       } else {
-         console.error("Error deleting role:", error);
-         toast.error("An error occurred while deleting the role.");
-       }
-     }
-   }
- };
-
-
-  // Open modal for adding or updating a role
-  const openModal = (role = null) => {
-    if (role) {
+  // Open modal for adding or updating a roomtype
+  const openModal = (roomtype = null) => {
+    if (roomtype) {
       setIsUpdate(true);
-      setRoleData(role);
+      setRoomtypeData(roomtype);
     } else {
       setIsUpdate(false);
-      setRoleData({ name: "", status: "active", limit: "" });
+      setRoomtypeData({ type: "", halfdayprice: "", fulldayprice: "" });
     }
     setIsModalOpen(true);
   };
 
-  // Open modal for viewing role details
-  const openViewModal = (role) => {
-    setViewRole(role);
+  // Open modal for viewing roomtype details
+  const openViewModal = (roomtype) => {
+    setViewRoomtype(roomtype);
   };
 
   // Close the view modal
   const closeViewModal = () => {
-    setViewRole(null);
+    setViewRoomtype(null);
   };
 
   return (
     <>
-      <div className="card mb-3" id="rolesTable">
+      <div className="card mb-3" id="roomtypesTable">
         <div className="card-header">
           <div className="row flex-between-center">
             <div className="col-4 col-sm-auto d-flex align-items-center pe-0">
-              <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Roles</h5>
+              <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Roomtypes</h5>
             </div>
             <div className="col-8 col-sm-auto ms-auto text-end ps-0">
               <button
@@ -198,9 +183,9 @@ const Roleread = () => {
               <thead className="bg-200">
                 <tr>
                   <th>#</th>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Limit</th>
+                  <th>Type</th>
+                  <th>Halfday Price</th>
+                  <th>Fullday Price</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -211,13 +196,13 @@ const Roleread = () => {
                       Loading...
                     </td>
                   </tr>
-                ) : roles.length > 0 ? (
-                  roles.map((role, index) => (
-                    <tr key={role._id}>
+                ) : roomtypes.length > 0 ? (
+                  roomtypes.map((roomtype, index) => (
+                    <tr key={roomtype._id}>
                       <td>{index + 1}</td>
-                      <td>{role.name}</td>
-                      <td>{role.status}</td>
-                      <td>{role.limit}</td>
+                      <td>{roomtype.type}</td>
+                      <td>{roomtype.halfdayprice}</td>
+                      <td>{roomtype.fulldayprice}</td>
                       <td className="py-2 align-middle white-space-nowrap text-end">
                         <div className="dropdown font-sans-serif position-static">
                           <button
@@ -239,14 +224,14 @@ const Roleread = () => {
                               <Link
                                 className="dropdown-item"
                                 href="#!"
-                                onClick={() => openModal(role)}
+                                onClick={() => openModal(roomtype)}
                               >
                                 Update
                               </Link>
                               <Link
                                 className="dropdown-item"
                                 href="#!"
-                                onClick={() => openViewModal(role)} // Open view modal
+                                onClick={() => openViewModal(roomtype)} // Open view modal
                               >
                                 View
                               </Link>
@@ -254,7 +239,7 @@ const Roleread = () => {
                               <Link
                                 className="dropdown-item text-danger"
                                 href="#!"
-                                onClick={() => handleDelete(role._id)}
+                                onClick={() => handleDelete(roomtype._id)}
                               >
                                 Delete
                               </Link>
@@ -267,7 +252,7 @@ const Roleread = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="text-center">
-                      No roles found.
+                      No roomtypes found.
                     </td>
                   </tr>
                 )}
@@ -277,14 +262,14 @@ const Roleread = () => {
         </div>
       </div>
 
-      {/* Modal for adding or updating a role */}
+      {/* Modal for adding or updating a roomtype */}
       {isModalOpen && (
         <div className="modal show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {isUpdate ? "Update Role" : "Add New Role"}
+                  {isUpdate ? "Update Roomtype" : "Add New Roomtype"}
                 </h5>
                 <button
                   type="button"
@@ -293,54 +278,53 @@ const Roleread = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <form onSubmit={isUpdate ? updateRole : addRole}>
+                <form onSubmit={isUpdate ? updateRoomtype : addRoomtype}>
                   <div className="mb-3">
-                    <label htmlFor="name" className="form-label">
-                      Name
+                    <label htmlFor="type" className="form-label">
+                      Type
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      id="name"
-                      name="name"
-                      value={roleData.name}
+                      id="type"
+                      name="type"
+                      value={roomtypeData.type}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="mb-3">
-                    <label htmlFor="status" className="form-label">
-                      Status
-                    </label>
-                    <select
-                      className="form-control"
-                      id="status"
-                      name="status"
-                      value={roleData.status}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="limit" className="form-label">
-                      Limit
+                    <label htmlFor="halfdayprice" className="form-label">
+                      Halfday Price
                     </label>
                     <input
                       type="number"
                       className="form-control"
-                      id="limit"
-                      min="1"
-                      name="limit"
-                      value={roleData.limit}
+                      id="halfdayprice"
+                      name="halfdayprice"
+                      value={roomtypeData.halfdayprice}
                       onChange={handleChange}
                       required
+                      min={1}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="fulldayprice" className="form-label">
+                      Fullday Price
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="fulldayprice"
+                      name="fulldayprice"
+                      value={roomtypeData.fulldayprice}
+                      onChange={handleChange}
+                      required
+                      min={1}
                     />
                   </div>
                   <button type="submit" className="btn btn-primary">
-                    {isUpdate ? "Update Role" : "Add Role"}
+                    {isUpdate ? "Update Roomtype" : "Add Roomtype"}
                   </button>
                 </form>
               </div>
@@ -349,13 +333,13 @@ const Roleread = () => {
         </div>
       )}
 
-      {/* Modal for viewing role details */}
-      {viewRole && (
+      {/* Modal for viewing roomtype details */}
+      {viewRoomtype && (
         <div className="modal show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">View Role Details</h5>
+                <h5 className="modal-title">View Roomtype Details</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -364,13 +348,13 @@ const Roleread = () => {
               </div>
               <div className="modal-body">
                 <p>
-                  <strong>Name:</strong> {viewRole.name}
+                  <strong>Type:</strong> {viewRoomtype.type}
                 </p>
                 <p>
-                  <strong>Status:</strong> {viewRole.status}
+                  <strong>Halfday Price:</strong> {viewRoomtype.halfdayprice}
                 </p>
                 <p>
-                  <strong>Limit:</strong> {viewRole.limit}
+                  <strong>Fullday Price:</strong> {viewRoomtype.fulldayprice}
                 </p>
               </div>
             </div>
@@ -383,4 +367,4 @@ const Roleread = () => {
   );
 };
 
-export default Roleread;
+export default Roomtype;

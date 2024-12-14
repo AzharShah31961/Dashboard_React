@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { Link } from "react-router-dom";
 const Guestread = () => {
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,39 +34,52 @@ const Guestread = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "phone") {
       // Allow only numbers and limit to 11 digits
       if (!/^\d*$/.test(value) || value.length > 11) {
         return;
       }
     }
-  
+
+    if (name === "documentno") {
+      // Restrict document number length based on document type
+      if (guestData.documenttype === "cnic" && value.length > 13) {
+        return; // Limit CNIC number to 13 digits
+      }
+      if (guestData.documenttype === "passport" && value.length > 10) {
+        return; // Limit Passport number to 10 digits
+      }
+    }
+
+    // Update guest data state
     setGuestData({ ...guestData, [name]: value });
   };
-  
 
   // Add new guest
   const addGuest = async (e) => {
     e.preventDefault();
-  
+
     // Validation
     const nameRegex = /^[A-Za-z\s]+$/;
     if (!nameRegex.test(guestData.name)) {
       toast.error("Name sirf alphabets ka hona chahiye.");
       return;
     }
-  
+
     if (!/^\d{11}$/.test(guestData.phone)) {
       toast.error("Phone number sirf 11 digits ka hona chahiye.");
       return;
     }
-  
-    if (guestData.documenttype === "cnic" && guestData.documentno.length !== 13) {
+
+    if (
+      guestData.documenttype === "cnic" &&
+      guestData.documentno.length !== 13
+    ) {
       toast.error("CNIC number sirf 13 digits ka hona chahiye.");
       return;
     }
-  
+
     if (
       guestData.documenttype === "passport" &&
       (guestData.documentno.length < 6 || guestData.documentno.length > 10)
@@ -74,41 +87,51 @@ const Guestread = () => {
       toast.error("Passport number 6-10 characters ke darmiyan hona chahiye.");
       return;
     }
-  
+
     // Axios Request
     try {
-      const response = await axios.post("http://localhost:5000/api/guest/create", guestData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/guest/create",
+        guestData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       toast.success("Guest successfully create ho gaya!");
       fetchGuests();
-      setGuestData({ name: "", email: "", phone: "", documenttype: "", documentno: "" });
+      setGuestData({
+        name: "",
+        email: "",
+        phone: "",
+        documenttype: "",
+        documentno: "",
+      });
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Guest create karte waqt error hua.");
+      toast.error(
+        error.response?.data?.message || "Guest create karte waqt error hua."
+      );
     }
   };
-  
-  
 
   // Update existing guest
   const updateGuest = async (e) => {
     e.preventDefault();
-  
+
     // Validate name (only alphabets)
     const nameRegex = /^[A-Za-z\s]+$/;
     if (!nameRegex.test(guestData.name)) {
       toast.error("Name must contain only alphabets.");
       return;
     }
-  
+
     // Validate phone (exactly 11 digits)
     if (guestData.phone.length !== 11) {
       toast.error("Phone number must be exactly 11 digits.");
       return;
     }
-  
+
     // Validate document number based on selected document type
     if (guestData.documenttype === "cnic") {
       // CNIC should only contain digits
@@ -131,13 +154,16 @@ const Guestread = () => {
       toast.error("Please select a valid document type.");
       return;
     }
-  
+
     // Prepare data for the API request (exclude _id and __v)
     const { _id, __v, ...guestUpdateData } = guestData;
-  
+
     // Make PUT request to update the guest data
     try {
-      const response = await axios.put(`http://localhost:5000/api/guest/update/${_id}`, guestUpdateData);
+      const response = await axios.put(
+        `http://localhost:5000/api/guest/update/${_id}`,
+        guestUpdateData
+      );
       console.log(guestUpdateData);
       toast.success("Guest updated successfully!");
       fetchGuests(); // Refresh the guest list
@@ -154,9 +180,6 @@ const Guestread = () => {
       toast.error("An error occurred while updating the guest.");
     }
   };
-  
-  
-  
 
   // Delete guest
   const handleDelete = async (guestId) => {
@@ -176,7 +199,7 @@ const Guestread = () => {
     if (guest) {
       setIsUpdate(true);
       setGuestData({
-        ...guest,  // Spread the guest data
+        ...guest, // Spread the guest data
         documenttype: guest.documenttype || "", // Ensure document type is set correctly
       });
     } else {
@@ -243,18 +266,48 @@ const Guestread = () => {
                       <td>{guest.documenttype}</td>
                       <td>{guest.documentno}</td>
                       <td className="py-2 align-middle white-space-nowrap text-end">
-                        <button
-                          className="btn btn-primary me-2"
-                          onClick={() => openModal(guest)} // Open update modal
-                        >
-                          Update
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDelete(guest._id)} // Delete guest
-                        >
-                          Delete
-                        </button>
+                        <div className="dropdown font-sans-serif position-static">
+                          <button
+                            className="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal"
+                            type="button"
+                            id="order-dropdown-0"
+                            data-bs-toggle="dropdown"
+                            data-boundary="viewport"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                          >
+                            <span className="fas fa-ellipsis-h fs-10"></span>
+                          </button>
+                          <div
+                            className="dropdown-menu dropdown-menu-end border py-0"
+                            aria-labelledby="order-dropdown-0"
+                          >
+                            <div className="py-2">
+                              <Link
+                                className="dropdown-item"
+                                href="#!"
+                                onClick={() => openModal(guest)}
+                              >
+                                Update
+                              </Link>
+                              <Link
+                                className="dropdown-item"
+                                href="#!"
+                                // Open view modal
+                              >
+                                View
+                              </Link>
+                              <div className="dropdown-divider"></div>
+                              <Link
+                                className="dropdown-item text-danger"
+                                href="#!"
+                                onClick={() => handleDelete(guest._id)}
+                              >
+                                Delete
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))

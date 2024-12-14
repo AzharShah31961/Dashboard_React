@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { Link } from "react-router-dom";
 const Staffread = () => {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,20 +23,22 @@ const Staffread = () => {
   const fetchStaff = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/staff/");
-      
+
       // Assuming each staff member has a `role` field with an ID
       const staffWithRoles = await Promise.all(
         response.data.map(async (staffMember) => {
           // Fetch the role details for each staff member
-          const roleResponse = await axios.get(`http://localhost:5000/api/role/${staffMember.role}`);
+          const roleResponse = await axios.get(
+            `http://localhost:5000/api/role/${staffMember.role}`
+          );
           return {
             ...staffMember,
-            role: roleResponse.data,  // Attach the full role object
+            role: roleResponse.data, // Attach the full role object
           };
         })
       );
-  
-      setStaff(staffWithRoles);  // Update the staff list with role data
+
+      setStaff(staffWithRoles); // Update the staff list with role data
       setLoading(false);
     } catch (error) {
       console.error("Error fetching staff:", error);
@@ -59,101 +61,134 @@ const Staffread = () => {
   }, []);
 
   // Handle input changes
-  
-const handleChange = (e) => {
-  const { name, value } = e.target;
 
-  // If the CNIC field, allow only 13 characters
-  if (name === "cnic" && value.length > 13) {
-    return; // Prevent further input if length exceeds 13
-  }
-  if (name === "phone" && value.length > 11) {
-    return; // Prevent further input if length exceeds 13
-  }
-  setStaffData({ ...staffData, [name]: value });
-};
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // If the CNIC field, allow only 13 characters
+    if (name === "cnic" && value.length > 13) {
+      return; // Prevent further input if length exceeds 13
+    }
+    if (name === "phone" && value.length > 11) {
+      return; // Prevent further input if length exceeds 13
+    }
+    setStaffData({ ...staffData, [name]: value });
+  };
 
   // Add new staff
   // Add new staff
-const addStaff = async (e) => {
-  e.preventDefault();
+  // Add Staff with Field-Specific Error Handling
+  // Add Staff with Validation
+  const addStaff = async (e) => {
+    e.preventDefault();
 
-  console.log("Staff Data:", staffData); // Log to ensure role is included
+    // Frontend validation
+    if (staffData.phone.length !== 11) {
+      toast.error("Phone number must be 11 digits");
+      return;
+    }
+    if (staffData.cnic.length !== 13) {
+      toast.error("CNIC must be 13 digits");
+      return;
+    }
 
-  try {
-    const response = await axios.post("http://localhost:5000/api/staff/create", staffData);
-    console.log("Create response:", response);
-    toast.success("Staff created successfully!");
-    fetchStaff(); // Refresh the staff list
-    setStaffData({
-      username: "",
-      email: "",
-      phone: "",
-      cnic: "",
-      password: "",
-      role: "",  // Reset the role field after submission
-    });
-    setIsModalOpen(false); // Close modal
-  } catch (error) {
-    console.error("Error creating staff:", error);
-    // Show custom error message in toast
-    toast.error(
-      error.response?.data?.message || "An error occurred while creating the staff."
-    );
-  }
-};
-  // Update existing staff
+    try {
+      await axios.post("http://localhost:5000/api/staff/create", staffData);
+      toast.success("Staff created successfully!");
+      fetchStaff();
+      setStaffData({
+        username: "",
+        email: "",
+        phone: "",
+        cnic: "",
+        password: "",
+        role: "",
+      });
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creating staff:", error);
+
+      // Handle server-side errors
+      const errors = error.response?.data?.errors;
+      if (errors) {
+        Object.keys(errors).forEach((field) => {
+          toast.error(errors[field]); // Show each field error
+        });
+      } else {
+        toast.error(
+          error.response?.data?.message ||
+            "An unexpected error occurred while creating the staff."
+        );
+      }
+    }
+  };
+
+  // Update Staff with Validation
   const updateStaff = async (e) => {
     e.preventDefault();
-  
-    const { _id, __v, ...staffUpdateData } = staffData; // Exclude `_id` and `__v`
-  
+
+    // Frontend validation
+    if (staffData.phone.length !== 11) {
+      toast.error("Phone number must be 11 digits");
+      return;
+    }
+    if (staffData.cnic.length !== 13) {
+      toast.error("CNIC must be 13 digits");
+      return;
+    }
+
+    const { _id, __v, ...staffUpdateData } = staffData;
+
     try {
-      const response = await axios.put(
+      await axios.put(
         `http://localhost:5000/api/staff/update/${_id}`,
         staffUpdateData
       );
-      console.log("Update response:", response.data);
-  
-      // Check for staff limit reached condition in the response
-      if (response.data.limitReached) { // Adjust this condition based on your API response structure
-        toast.error(`Limit reached for ${staffData.username}!`);
-      } else {
-        toast.success("Staff updated successfully!");
-        fetchStaff(); // Refresh the staff list
-        setStaffData({
-          username: "",
-          email: "",
-          phone: "",
-          cnic: "",
-          password: "",
-          role: "",
-        }); // Reset form
-        setIsModalOpen(false); // Close modal
-      }
+      toast.success("Staff updated successfully!");
+      fetchStaff();
+      setStaffData({
+        username: "",
+        email: "",
+        phone: "",
+        cnic: "",
+        password: "",
+        role: "",
+      });
+      setIsModalOpen(false);
     } catch (error) {
-      console.error("Error updating staff:", error.response || error);
-      toast.error(
-        error.response?.data?.message || "An error occurred while updating the staff."
-      );
+      console.error("Error updating staff:", error);
+
+      // Handle server-side errors
+      const errors = error.response?.data?.errors;
+      if (errors) {
+        Object.keys(errors).forEach((field) => {
+          toast.error(errors[field]); // Show each field error
+        });
+      } else {
+        toast.error(
+          error.response?.data?.message ||
+            "An unexpected error occurred while updating the staff."
+        );
+      }
     }
   };
-  
+
   // Delete staff
-const handleDelete = async (staffId) => {
-  if (window.confirm("Are you sure you want to delete this staff member?")) {
-    try {
-      await axios.delete(`http://localhost:5000/api/staff/delete/${staffId}`);
-      toast.success("Staff deleted successfully!");
-      setStaff(staff.filter((member) => member._id !== staffId));
-    } catch (error) {
-      console.error("Error deleting staff:", error);
-      toast.error(
-        error.response?.data?.message || "An error occurred while deleting the staff."
-      );
+  const handleDelete = async (staffId) => {
+    if (window.confirm("Are you sure you want to delete this staff member?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/staff/delete/${staffId}`);
+        toast.success("Staff deleted successfully!");
+        setStaff(staff.filter((member) => member._id !== staffId));
+      } catch (error) {
+        console.error("Error deleting staff:", error);
+        toast.error(
+          error.response?.data?.message ||
+            "An error occurred while deleting the staff."
+        );
+      }
     }
-  }
-};
+  };
 
   // Open modal for adding or updating staff
   const openModal = (member = null) => {
@@ -178,26 +213,26 @@ const handleDelete = async (staffId) => {
   };
 
   // Open view modal
- // Open View Modal Function
-const openViewModal = (member = null) => {
-  if (member) {
-    setStaffData({
-      ...member,  // Spread the member data
-      role: member.role || { name: "N/A" }, // Ensure the role object is properly set
-    });
-  } else {
-    setStaffData({
-      username: "",
-      email: "",
-      phone: "",
-      cnic: "",
-      password: "",
-      role: { name: "N/A" },
-    });
-  }
-  setIsViewModalOpen(true); // Show view modal
-};
-  
+  // Open View Modal Function
+  const openViewModal = (member = null) => {
+    if (member) {
+      setStaffData({
+        ...member, // Spread the member data
+        role: member.role || { name: "N/A" }, // Ensure the role object is properly set
+      });
+    } else {
+      setStaffData({
+        username: "",
+        email: "",
+        phone: "",
+        cnic: "",
+        password: "",
+        role: { name: "N/A" },
+      });
+    }
+    setIsViewModalOpen(true); // Show view modal
+  };
+
   return (
     <>
       <div className="card mb-3" id="staffTable">
@@ -247,7 +282,7 @@ const openViewModal = (member = null) => {
                       <td>{member.email}</td>
                       <td>{member.phone}</td>
                       <td>{member.cnic}</td>
-                      <td>{member.role?.name }</td>
+                      <td>{member.role?.name}</td>
                       <td className="py-2 align-middle white-space-nowrap text-end">
                         <div className="dropdown font-sans-serif position-static">
                           <button
@@ -266,26 +301,26 @@ const openViewModal = (member = null) => {
                             aria-labelledby="order-dropdown-0"
                           >
                             <div className="py-2">
-                              <a
+                              <Link
                                 className="dropdown-item"
                                 onClick={() => openModal(member)} // Open update modal
                               >
                                 Update
-                              </a>
-                              <a
+                              </Link>
+                              <Link
                                 className="dropdown-item"
                                 onClick={() => openViewModal(member)} // Open view modal
                               >
                                 View
-                              </a>
+                              </Link>
                               <div className="dropdown-divider"></div>
-                              <a
+                              <Link
                                 className="dropdown-item text-danger"
                                 href="#!"
                                 onClick={() => handleDelete(member._id)} // Delete user on click
                               >
                                 Delete
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -307,12 +342,23 @@ const openViewModal = (member = null) => {
 
       {/* Modal for Add/Update Staff */}
       {isModalOpen && (
-        <div className="modal fade show" tabIndex="-1" style={{ display: "block" }} aria-hidden="false">
+        <div
+          className="modal fade show"
+          tabIndex="-1"
+          style={{ display: "block" }}
+          aria-hidden="false"
+        >
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{isUpdate ? "Update Staff" : "Add Staff"}</h5>
-                <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
+                <h5 className="modal-title">
+                  {isUpdate ? "Update Staff" : "Add Staff"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsModalOpen(false)}
+                ></button>
               </div>
               <div className="modal-body">
                 <form onSubmit={isUpdate ? updateStaff : addStaff}>
@@ -400,9 +446,9 @@ const openViewModal = (member = null) => {
                       onChange={handleChange}
                       required
                     >
-                      <option value="" 
-                      selected 
-                      disabled>Select Role</option>
+                      <option value="" selected disabled>
+                        Select Role
+                      </option>
                       {roles.map((role) => (
                         <option key={role._id} value={role._id}>
                           {role.name}
@@ -424,44 +470,49 @@ const openViewModal = (member = null) => {
 
       {/* Modal for View Staff */}
       {isViewModalOpen && (
-  <div className="modal fade show" tabIndex="-1" style={{ display: "block" }} aria-hidden="false">
-    <div className="modal-dialog modal-dialog-centered modal-lg">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title">View Staff</h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => setIsViewModalOpen(false)}
-          ></button>
+        <div
+          className="modal fade show"
+          tabIndex="-1"
+          style={{ display: "block" }}
+          aria-hidden="false"
+        >
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">View Staff</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsViewModalOpen(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <strong>Username:</strong>
+                  <p>{staffData.username}</p>
+                </div>
+                <div className="mb-3">
+                  <strong>Email:</strong>
+                  <p>{staffData.email}</p>
+                </div>
+                <div className="mb-3">
+                  <strong>Phone:</strong>
+                  <p>{staffData.phone}</p>
+                </div>
+                <div className="mb-3">
+                  <strong>CNIC:</strong>
+                  <p>{staffData.cnic}</p>
+                </div>
+                <div className="mb-3">
+                  <strong>Role:</strong>
+                  <p>{staffData.role?.name || "N/A"}</p>{" "}
+                  {/* Access role.name or show "N/A" */}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="modal-body">
-          <div className="mb-3">
-            <strong>Username:</strong>
-            <p>{staffData.username}</p>
-          </div>
-          <div className="mb-3">
-            <strong>Email:</strong>
-            <p>{staffData.email}</p>
-          </div>
-          <div className="mb-3">
-            <strong>Phone:</strong>
-            <p>{staffData.phone}</p>
-          </div>
-          <div className="mb-3">
-            <strong>CNIC:</strong>
-            <p>{staffData.cnic}</p>
-          </div>
-          <div className="mb-3">
-            <strong>Role:</strong>
-            <p>{staffData.role?.name || "N/A"}</p> {/* Access role.name or show "N/A" */}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
 
       <ToastContainer />
     </>

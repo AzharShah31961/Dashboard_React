@@ -4,181 +4,122 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 
-const Roleread = () => {
-  const [roles, setRoles] = useState([]);
+const Floorread = () => {
+  const [floors, setFloors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [roleData, setRoleData] = useState({
-    name: "",
-    status: "active",
-    limit: 0,
+  const [floorData, setFloorData] = useState({
+    number: "",
+    available: "yes",
+    limit: "",
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [viewRole, setViewRole] = useState(null); // State for viewing role details
+  const [viewFloor, setViewFloor] = useState(null); // State for viewing floor details
 
-  // Fetch roles from the backend
-  const fetchRoles = async () => {
+  // Fetch floors from the backend
+  const fetchFloors = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/role/");
-      setRoles(response.data);
+      const response = await axios.get("http://localhost:5000/api/floor/");
+      setFloors(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      console.error("Error fetching floors:", error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRoles();
+    fetchFloors();
   }, []);
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRoleData({ ...roleData, [name]: value });
+    setFloorData({ ...floorData, [name]: value });
   };
 
-  // Add new role
-  const addRole = async (e) => {
+  // Add new floor
+  const addFloor = async (e) => {
     e.preventDefault();
-
-    const preparedRoleData = {
-      ...roleData,
-      name: roleData.name.trim().toLowerCase(),
-    };
-
-    const alphaRegex = /^[a-zA-Z]+$/;
-    if (!alphaRegex.test(preparedRoleData.name)) {
-      toast.error("Role name must only contain alphabets.");
-      return;
-    }
-
     try {
-      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
-      const existingRoles = existingRolesResponse.data;
-
-      const duplicateRole = existingRoles.find(
-        (role) => role.name === preparedRoleData.name
+      const response = await axios.post(
+        "http://localhost:5000/api/floor/create",
+        floorData
       );
-
-      if (duplicateRole) {
-        toast.error("A role with the same name already exists.");
-        return;
-      }
-
-      const response = await axios.post("http://localhost:5000/api/role/create", preparedRoleData);
-      toast.success("Role created successfully!");
-
-      fetchRoles();
-      setRoleData({ name: "", status: "active", limit: "" });
+      toast.success("Floor added successfully!");
+      fetchFloors();
+      setFloorData({ number: "", available: "yes", limit: "" });
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error creating role:", error);
-      toast.error("An error occurred while creating the role.");
+      console.error(
+        "Error creating floor:",
+        error.response ? error.response.data : error.message
+      );
+      toast.error("An error occurred while adding the floor.");
     }
   };
 
-  // Update existing role
-  const updateRole = async (e) => {
+  // Update existing floor
+  const updateFloor = async (e) => {
     e.preventDefault();
-  
-    const { _id, __v, ...roleUpdateData } = roleData;
-  
-    // Convert role name to lowercase and trim whitespace
-    roleUpdateData.name = roleUpdateData.name.trim().toLowerCase();
-  
-    // Validate that the role name contains only alphabets
-    const alphaRegex = /^[a-zA-Z]+$/;
-    if (!alphaRegex.test(roleUpdateData.name)) {
-      toast.error("Role name must only contain alphabets (no numbers or special characters).");
-      return;
-    }
-  
     try {
-      // Fetch existing roles
-      const existingRolesResponse = await axios.get("http://localhost:5000/api/role/");
-      const existingRoles = existingRolesResponse.data;
-  
-      // Check if a role with the same name exists (excluding the current role being updated)
-      const duplicateRole = existingRoles.find(
-        (role) => role.name === roleUpdateData.name && role._id !== _id
-      );
-  
-      if (duplicateRole) {
-        toast.error("A role with the same name already exists.");
-        return;
-      }
-  
-      // Send update request
       const response = await axios.put(
-        `http://localhost:5000/api/role/update/${_id}`,
-        roleUpdateData
+        `http://localhost:5000/api/floor/update/${floorData._id}`,
+        floorData
       );
-  
-      toast.success("Role updated successfully!");
-      fetchRoles(); // Refresh roles
-      setRoleData({ name: "", status: "active", limit: 0 }); // Reset form
-      setIsModalOpen(false); // Close modal
+      toast.success("Floor updated successfully!");
+      fetchFloors();
+      setFloorData({ number: "", available: "yes", limit: "" });
+      setIsModalOpen(false);
     } catch (error) {
-      console.error("Error updating role:", error.response || error);
-      toast.error(
-        error.response?.data?.message || "An error occurred while updating the role."
-      );
+      console.error("Error updating floor:", error);
+      toast.error("An error occurred while updating the floor.");
     }
   };
-  
 
+  // Delete floor
+  const handleDelete = async (floorId) => {
+    if (window.confirm("Are you sure you want to delete this floor?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/floor/delete/${floorId}`);
+        toast.success("Floor deleted successfully!");
+        setFloors(floors.filter((floor) => floor._id !== floorId));
+      } catch (error) {
+        console.error("Error deleting floor:", error);
+        toast.error("An error occurred while deleting the floor.");
+      }
+    }
+  };
 
-  // Delete role
- const handleDelete = async (roleId) => {
-   if (window.confirm("Are you sure you want to delete this role?")) {
-     try {
-       await axios.delete(`http://localhost:5000/api/role/delete/${roleId}`);
-       toast.success("Role deleted successfully!");
-       setRoles(roles.filter((role) => role._id !== roleId));
-     } catch (error) {
-       if (error.response && error.response.status === 400) {
-         toast.error(
-           "This role is currently assigned to a staff member and cannot be deleted."
-         );
-       } else {
-         console.error("Error deleting role:", error);
-         toast.error("An error occurred while deleting the role.");
-       }
-     }
-   }
- };
-
-
-  // Open modal for adding or updating a role
-  const openModal = (role = null) => {
-    if (role) {
+  // Open modal for adding or updating a floor
+  const openModal = (floor = null) => {
+    if (floor) {
       setIsUpdate(true);
-      setRoleData(role);
+      setFloorData(floor);
     } else {
       setIsUpdate(false);
-      setRoleData({ name: "", status: "active", limit: "" });
+      setFloorData({ number: "", available: "yes", limit: "" });
     }
     setIsModalOpen(true);
   };
 
-  // Open modal for viewing role details
-  const openViewModal = (role) => {
-    setViewRole(role);
+  // Open modal for viewing floor details
+  const openViewModal = (floor) => {
+    setViewFloor(floor);
   };
 
   // Close the view modal
   const closeViewModal = () => {
-    setViewRole(null);
+    setViewFloor(null);
   };
 
   return (
     <>
-      <div className="card mb-3" id="rolesTable">
+      <div className="card mb-3" id="floorsTable">
         <div className="card-header">
           <div className="row flex-between-center">
             <div className="col-4 col-sm-auto d-flex align-items-center pe-0">
-              <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Roles</h5>
+              <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Floors</h5>
             </div>
             <div className="col-8 col-sm-auto ms-auto text-end ps-0">
               <button
@@ -198,8 +139,8 @@ const Roleread = () => {
               <thead className="bg-200">
                 <tr>
                   <th>#</th>
-                  <th>Name</th>
-                  <th>Status</th>
+                  <th>Floor No</th>
+                  <th>Available</th>
                   <th>Limit</th>
                   <th>Actions</th>
                 </tr>
@@ -211,19 +152,19 @@ const Roleread = () => {
                       Loading...
                     </td>
                   </tr>
-                ) : roles.length > 0 ? (
-                  roles.map((role, index) => (
-                    <tr key={role._id}>
+                ) : floors.length > 0 ? (
+                  floors.map((floor, index) => (
+                    <tr key={floor._id}>
                       <td>{index + 1}</td>
-                      <td>{role.name}</td>
-                      <td>{role.status}</td>
-                      <td>{role.limit}</td>
+                      <td>{floor.number}</td>
+                      <td>{floor.available}</td>
+                      <td>{floor.limit}</td>
                       <td className="py-2 align-middle white-space-nowrap text-end">
                         <div className="dropdown font-sans-serif position-static">
                           <button
                             className="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal"
                             type="button"
-                            id="order-dropdown-0"
+                            id="floor-dropdown-0"
                             data-bs-toggle="dropdown"
                             data-boundary="viewport"
                             aria-haspopup="true"
@@ -233,20 +174,20 @@ const Roleread = () => {
                           </button>
                           <div
                             className="dropdown-menu dropdown-menu-end border py-0"
-                            aria-labelledby="order-dropdown-0"
+                            aria-labelledby="floor-dropdown-0"
                           >
                             <div className="py-2">
                               <Link
                                 className="dropdown-item"
                                 href="#!"
-                                onClick={() => openModal(role)}
+                                onClick={() => openModal(floor)}
                               >
                                 Update
                               </Link>
                               <Link
                                 className="dropdown-item"
                                 href="#!"
-                                onClick={() => openViewModal(role)} // Open view modal
+                                onClick={() => openViewModal(floor)} // Open view modal
                               >
                                 View
                               </Link>
@@ -254,7 +195,7 @@ const Roleread = () => {
                               <Link
                                 className="dropdown-item text-danger"
                                 href="#!"
-                                onClick={() => handleDelete(role._id)}
+                                onClick={() => handleDelete(floor._id)}
                               >
                                 Delete
                               </Link>
@@ -267,7 +208,7 @@ const Roleread = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="text-center">
-                      No roles found.
+                      No floors found.
                     </td>
                   </tr>
                 )}
@@ -277,14 +218,14 @@ const Roleread = () => {
         </div>
       </div>
 
-      {/* Modal for adding or updating a role */}
+      {/* Modal for adding or updating a floor */}
       {isModalOpen && (
         <div className="modal show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {isUpdate ? "Update Role" : "Add New Role"}
+                  {isUpdate ? "Update Floor" : "Add New Floor"}
                 </h5>
                 <button
                   type="button"
@@ -293,35 +234,35 @@ const Roleread = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <form onSubmit={isUpdate ? updateRole : addRole}>
+                <form onSubmit={isUpdate ? updateFloor : addFloor}>
                   <div className="mb-3">
-                    <label htmlFor="name" className="form-label">
-                      Name
+                    <label htmlFor="number" className="form-label">
+                      Floor No
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       className="form-control"
-                      id="name"
-                      name="name"
-                      value={roleData.name}
+                      id="number"
+                      name="number"
+                      value={floorData.number}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="mb-3">
-                    <label htmlFor="status" className="form-label">
-                      Status
+                    <label htmlFor="available" className="form-label">
+                      Available
                     </label>
                     <select
                       className="form-control"
-                      id="status"
-                      name="status"
-                      value={roleData.status}
+                      id="available"
+                      name="available"
+                      value={floorData.available}
                       onChange={handleChange}
                       required
                     >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
                     </select>
                   </div>
                   <div className="mb-3">
@@ -332,15 +273,14 @@ const Roleread = () => {
                       type="number"
                       className="form-control"
                       id="limit"
-                      min="1"
                       name="limit"
-                      value={roleData.limit}
+                      value={floorData.limit}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <button type="submit" className="btn btn-primary">
-                    {isUpdate ? "Update Role" : "Add Role"}
+                    {isUpdate ? "Update Floor" : "Add Floor"}
                   </button>
                 </form>
               </div>
@@ -349,13 +289,13 @@ const Roleread = () => {
         </div>
       )}
 
-      {/* Modal for viewing role details */}
-      {viewRole && (
+      {/* Modal for viewing floor details */}
+      {viewFloor && (
         <div className="modal show" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">View Role Details</h5>
+                <h5 className="modal-title">View Floor Details</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -364,13 +304,13 @@ const Roleread = () => {
               </div>
               <div className="modal-body">
                 <p>
-                  <strong>Name:</strong> {viewRole.name}
+                  <strong>Floor No:</strong> {viewFloor.number}
                 </p>
                 <p>
-                  <strong>Status:</strong> {viewRole.status}
+                  <strong>Available:</strong> {viewFloor.available}
                 </p>
                 <p>
-                  <strong>Limit:</strong> {viewRole.limit}
+                  <strong>Limit:</strong> {viewFloor.limit}
                 </p>
               </div>
             </div>
@@ -383,4 +323,4 @@ const Roleread = () => {
   );
 };
 
-export default Roleread;
+export default Floorread;
