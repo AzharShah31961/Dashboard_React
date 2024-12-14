@@ -35,66 +35,61 @@ const Guestread = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
   
-    if (name === "phone" && value.length > 11) {
-      return; // Prevent updating if phone exceeds 10 digits
+    if (name === "phone") {
+      // Allow only numbers and limit to 11 digits
+      if (!/^\d*$/.test(value) || value.length > 11) {
+        return;
+      }
     }
   
     setGuestData({ ...guestData, [name]: value });
   };
+  
 
   // Add new guest
   const addGuest = async (e) => {
     e.preventDefault();
   
-    // Validate name (only alphabets)
+    // Validation
     const nameRegex = /^[A-Za-z\s]+$/;
     if (!nameRegex.test(guestData.name)) {
-      toast.error("Name must contain only alphabets.");
+      toast.error("Name sirf alphabets ka hona chahiye.");
       return;
     }
   
-    // Validate phone (exactly 11 digits)
-    if (guestData.phone.length !== 11) {
-      toast.error("Phone number must be exactly 11 digits.");
+    if (!/^\d{11}$/.test(guestData.phone)) {
+      toast.error("Phone number sirf 11 digits ka hona chahiye.");
       return;
     }
   
-    // Validate document number based on selected document type
-    if (guestData.documenttype === "cnic") {
-      if (!/^\d+$/.test(guestData.documentno)) {
-        toast.error("CNIC number must contain only digits.");
-        return;
-      }
-      if (guestData.documentno.length != 13 || guestData.documentno.length >= 13) {
-        toast.error("CNIC number must be 13 digits.");
-        return;
-      }
-    } else if (guestData.documenttype === "passport") {
-      if (guestData.documentno.length < 6 || guestData.documentno.length > 10) {
-        toast.error("Passport number must be between 6 and 10 characters.");
-        return;
-      }
-    } else {
-      toast.error("Please select a valid document type.");
+    if (guestData.documenttype === "cnic" && guestData.documentno.length !== 13) {
+      toast.error("CNIC number sirf 13 digits ka hona chahiye.");
       return;
     }
   
+    if (
+      guestData.documenttype === "passport" &&
+      (guestData.documentno.length < 6 || guestData.documentno.length > 10)
+    ) {
+      toast.error("Passport number 6-10 characters ke darmiyan hona chahiye.");
+      return;
+    }
+  
+    // Axios Request
     try {
-      const response = await axios.post("http://localhost:5000/api/guest/create", guestData);
-      toast.success("Guest created successfully!");
-      fetchGuests(); // Refresh the guest list
-      setGuestData({
-        name: "",
-        email: "",
-        phone: "",
-        documenttype: "",
-        documentno: "",
+      const response = await axios.post("http://localhost:5000/api/guest/create", guestData, {
+        headers: { "Content-Type": "application/json" },
       });
-      setIsModalOpen(false); // Close modal
+      toast.success("Guest successfully create ho gaya!");
+      fetchGuests();
+      setGuestData({ name: "", email: "", phone: "", documenttype: "", documentno: "" });
+      setIsModalOpen(false);
     } catch (error) {
-      toast.error("An error occurred while creating the guest.");
+      console.error("Error:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Guest create karte waqt error hua.");
     }
   };
+  
   
 
   // Update existing guest
@@ -116,15 +111,18 @@ const Guestread = () => {
   
     // Validate document number based on selected document type
     if (guestData.documenttype === "cnic") {
+      // CNIC should only contain digits
       if (!/^\d+$/.test(guestData.documentno)) {
         toast.error("CNIC number must contain only digits.");
         return;
       }
-      if (guestData.documentno.length != 13 ||guestData.documentno.length <= 13) {
-        toast.error("CNIC number must be  13 digits.");
+      // CNIC number must be exactly 13 digits
+      if (guestData.documentno.length !== 13) {
+        toast.error("CNIC number must be exactly 13 digits.");
         return;
       }
     } else if (guestData.documenttype === "passport") {
+      // Passport number must be between 6 and 10 characters
       if (guestData.documentno.length < 6 || guestData.documentno.length > 10) {
         toast.error("Passport number must be between 6 and 10 characters.");
         return;
@@ -134,9 +132,13 @@ const Guestread = () => {
       return;
     }
   
+    // Prepare data for the API request (exclude _id and __v)
+    const { _id, __v, ...guestUpdateData } = guestData;
+  
+    // Make PUT request to update the guest data
     try {
-      const { _id, __v, ...guestUpdateData } = guestData; // Exclude `_id`
       const response = await axios.put(`http://localhost:5000/api/guest/update/${_id}`, guestUpdateData);
+      console.log(guestUpdateData);
       toast.success("Guest updated successfully!");
       fetchGuests(); // Refresh the guest list
       setGuestData({
@@ -148,9 +150,12 @@ const Guestread = () => {
       });
       setIsModalOpen(false); // Close modal
     } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
       toast.error("An error occurred while updating the guest.");
     }
   };
+  
+  
   
 
   // Delete guest
