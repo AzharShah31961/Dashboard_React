@@ -127,69 +127,99 @@ const Staffread = () => {
   };
 
   // Update Staff with Validation
- const updateStaff = async (e) => {
-   e.preventDefault();
+const updateStaff = async (e) => {
+  e.preventDefault();
 
-   // Validation for CNIC and Phone
-   if (!/^\d{13}$/.test(staffData.cnic)) {
-     toast.error("CNIC must be exactly 13 digits and numeric.");
-     return;
-   }
-   if (!/^\d{11}$/.test(staffData.phone)) {
-     toast.error("Phone number must be exactly 11 digits and numeric.");
-     return;
-   }
+  // Validation for CNIC and Phone
+  if (!/^\d{13}$/.test(staffData.cnic)) {
+    toast.error("CNIC must be exactly 13 digits and numeric.");
+    return;
+  }
+  if (!/^\d{11}$/.test(staffData.phone)) {
+    toast.error("Phone number must be exactly 11 digits and numeric.");
+    return;
+  }
 
-   const { _id, __v, ...staffUpdateData } = staffData;
+  const { _id, __v, ...staffUpdateData } = staffData;
 
-   // Checking if the role is changing to 'manager' and if the limit is reached
-   if (staffData.role !== currentRole) {
-     if (staffData.role === "manager") {
-       const managerCount = staff.filter(
-         (member) => member.role?.name === "Manager"
-       ).length;
+  // Check if the role is changing
+  const roleChanged = staffData.role !== currentRole;
 
-       if (managerCount >= 1) {
-         // Limit of 1 manager
-         toast.error("Manager limit reached. Role cannot be updated.");
-         return;
-       }
-     }
-   }
+  if (roleChanged) {
+    // Count current members with the selected role
+    const roleCount = staff.filter(
+      (member) => member.role?.name === staffData.role
+    ).length;
 
-   try {
-     await axios.put(
-       `http://localhost:5000/api/staff/update/${_id}`,
-       staffUpdateData
-     );
-     toast.success("Staff updated successfully!");
-     fetchStaff();
-     setStaffData({
-       username: "",
-       email: "",
-       phone: "",
-       cnic: "",
-       password: "",
-       role: "",
-     });
-     setIsModalOpen(false);
-   } catch (error) {
-     console.error("Error updating staff:", error);
+    // Define a limit for each role
+    const roleLimits = {
+      manager: 2, // Example: max 2 managers
+      employee: 5, // Example: max 5 employees
+      // Add more roles with their respective limits
+    };
 
-     // Handle server-side errors
-     const errors = error.response?.data?.errors;
-     if (errors) {
-       Object.keys(errors).forEach((field) => {
-         toast.error(errors[field]); // Show each field error
-       });
-     } else {
-       toast.error(
-         error.response?.data?.message ||
-           "An unexpected error occurred while updating the staff."
-       );
-     }
-   }
- };
+    // Check if the limit for the selected role has been reached or not
+    if (roleCount >= (roleLimits[staffData.role.toLowerCase()] || Infinity)) {
+      toast.error(
+        `The limit for the role "${staffData.role}" has been surpassed.`
+      );
+      return;
+    }
+    if (roleCount === roleLimits[staffData.role.toLowerCase()]) {
+      // Allow update if limit is exactly met
+      toast.info(
+        `The role "${staffData.role}" limit has been reached but update is allowed.`
+      );
+    }
+  }
+
+  try {
+    // Proceed with updating staff if role change is valid
+    await axios.put(
+      `http://localhost:5000/api/staff/update/${_id}`,
+      staffUpdateData
+    );
+    toast.success("Staff updated successfully!");
+
+    // Refresh staff data
+    fetchStaff();
+
+    // Reset form fields
+    setStaffData({
+      username: "",
+      email: "",
+      phone: "",
+      cnic: "",
+      password: "",
+      role: "",
+    });
+
+    // Close modal
+    setIsModalOpen(false);
+  } catch (error) {
+    console.error("Error updating staff:", error);
+
+    // Handle server-side errors
+    const errors = error.response?.data?.errors;
+    if (errors) {
+      Object.keys(errors).forEach((field) => {
+        toast.error(errors[field]); // Show each field error
+      });
+    } else {
+      toast.error(
+        error.response?.data?.message ||
+          "An unexpected error occurred while updating the staff."
+      );
+    }
+  }
+};
+
+
+
+
+
+
+
 
 
   // Delete staff
