@@ -35,109 +35,149 @@ const Adminread = () => {
     fetchUsers();
   }, []);
 
-  // Handle input changes
+  // Handle input changes0
 // Handle input changes
 const handleChange = (e) => {
   const { name, value } = e.target;
 
-  if (name === "phone" && value.length > 11) {
-    return; // Prevent updating if phone exceeds 10 digits
+  if (name === "phone") {
+    // Allow only numeric values
+    const numericValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+    if (numericValue.length > 11) return; // Prevent more than 11 digits
+    setUserData({ ...userData, [name]: numericValue });
+    return;
+  }
+
+  if (name === "username" && !isValidUsername(value)) {
+    toast.warn("Number & special character is not allowed in username.");
   }
 
   setUserData({ ...userData, [name]: value });
 };
 
 
-  // Submit to add new admin
-  const handleAddAdmin = async (e) => {
-    e.preventDefault();
-  
-    try {
-      // Convert username and email to lowercase for case-insensitive handling
-      const preparedUserData = {
-        ...userData,
-        username: userData.username.trim().toLowerCase(),
-        email: userData.email.trim().toLowerCase(),
-      };
-  
-      // Send request to the server to add the new admin
-      await axios.post("http://localhost:5000/api/admin/create", preparedUserData);
-      toast.success("Admin added successfully!");
-  
-      // Reset the form fields
-      setUserData({ username: "", email: "", phone: "", password: "" });
-  
-      // Refresh the user list
-      fetchUsers();
-  
-      // Close the modal
-      setIsModalOpen(false);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        // Display the specific error message from the server
-        toast.error(error.response.data.message || "Failed to add admin.");
-      } else {
-        console.error("Error adding admin:", error);
-        toast.error("Failed to add admin.");
-      }
-    }
-  };
-  
+const isValidUsername = (username) => {
+  const regex = /^[a-zA-Z\s]+$/; // Allows only letters and spaces
+  return regex.test(username);
+};
 
-  const handleUpdateAdmin = async (e) => {
-    e.preventDefault();
+
+// Validate phone number
+const isValidPhoneNumber = (phone) => {
+  const regex = /^03\d{9}$/; // Must start with "03" and be 11 digits long
+  return regex.test(phone);
+};
+
+// Check for duplicate phone number in users list
+const isUniquePhoneNumber = (phone, userId) => {
+  return !users.some((user) => user.phone === phone && user._id !== userId);
+};
+// Check for duplicate username in users list
+const isUniqueUsername = (username, userId) => {
+  return !users.some((user) => user.username === username && user._id !== userId);
+};
+
+// Handle Add Admin with validation
+const handleAddAdmin = async (e) => {
+  e.preventDefault();
+
+   // Validate username
+   if (!isValidUsername(userData.username)) {
+    toast.error("Number & special character is not allowed in username.");
+    return;
+  }
+
+  // Validate phone number
+  if (!isValidPhoneNumber(userData.phone)) {
+    toast.error("Phone number must start with '03' and be 11 digits long.");
+    return;
+  }
+
+  // Check for unique phone number
+  if (!isUniquePhoneNumber(userData.phone)) {
+    toast.error("This phone number is already associated with another user.");
+    return;
+  }
+  if (!isUniqueUsername(userData.username.trim().toLowerCase(), userData._id)) {
+    toast.error("This username is already associated with another user.");
+    return;
+  }
   
-    try {
-      const { _id, __v, password, ...updatedData } = userData;
-  
-      // Normalize username and email to lowercase
-      const preparedUserData = {
-        ...updatedData,
-        username: updatedData.username.trim().toLowerCase(),
-        email: updatedData.email.trim().toLowerCase(),
-      };
-  
-      // Check for duplicates in the existing users (excluding the current user)
-      const duplicateUser = users.find(
-        (user) =>
-          user._id !== _id &&
-          (user.username === preparedUserData.username ||
-           user.email === preparedUserData.email)
-      );
-  
-      if (duplicateUser) {
-        toast.error("A user with the same username or email already exists.");
-        return;
-      }
-  
-      // Include password only if it has a value
-      if (password) {
-        preparedUserData.password = password;
-      }
-  
-      // Send request to the server to update the admin
-      await axios.put(`http://localhost:5000/api/admin/update/${_id}`, preparedUserData);
-      toast.success("Admin updated successfully!");
-  
-      // Reset the form fields
-      setUserData({ username: "", email: "", phone: "", password: "" });
-  
-      // Refresh the user list
-      fetchUsers();
-  
-      // Close the modal
-      setIsModalOpen(false);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        // Display the specific error message from the server
-        toast.error(error.response.data.message || "Failed to update admin.");
-      } else {
-        console.error("Error updating admin:", error);
-        toast.error("Failed to update admin.");
-      }
+  try {
+    const preparedUserData = {
+      ...userData,
+      username: userData.username.trim().toLowerCase(),
+      email: userData.email.trim().toLowerCase(),
+    };
+
+    await axios.post("http://localhost:5000/api/admin/create", preparedUserData);
+    toast.success("Admin added successfully!");
+
+    setUserData({ username: "", email: "", phone: "", password: "" });
+    fetchUsers();
+    setIsModalOpen(false);
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to add admin.";
+    console.error("Error adding admin:", errorMessage);
+    toast.error(errorMessage);
+  }
+};
+
+// Handle Update Admin with validation
+
+
+const handleUpdateAdmin = async (e) => {
+  e.preventDefault();
+
+  // Validate phone number
+  if (!isValidPhoneNumber(userData.phone)) {
+    toast.error("Phone number must start with '03' and be 11 digits long.");
+    return;
+  }
+  if (!isValidUsername(userData.username)) {
+    toast.error("Number & special character is not allowed in username.");
+    return;
+  }
+  // Check for unique phone number
+  if (!isUniquePhoneNumber(userData.phone, userData._id)) {
+    toast.error("This phone number is already associated with another user.");
+    return;
+  }
+
+  // Check for unique username
+  if (!isUniqueUsername(userData.username.trim().toLowerCase(), userData._id)) {
+    toast.error("This username is already associated with another user.");
+    return;
+  }
+
+  try {
+    const { _id, __v, password, ...updatedData } = userData;
+
+    const preparedUserData = {
+      ...updatedData,
+      username: updatedData.username.trim().toLowerCase(),
+      email: updatedData.email.trim().toLowerCase(),
+    };
+
+    if (password) {
+      preparedUserData.password = password;
     }
-  };
-  
+
+    await axios.put(`http://localhost:5000/api/admin/update/${_id}`, preparedUserData);
+    toast.success("Admin updated successfully!");
+
+    setUserData({ username: "", email: "", phone: "", password: "" });
+    fetchUsers();
+    setIsModalOpen(false);
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to update admin.";
+    console.error("Error updating admin:", errorMessage);
+    toast.error(errorMessage);
+  }
+};
+
+
+
   
   
   

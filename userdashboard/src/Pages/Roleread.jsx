@@ -130,25 +130,37 @@ const Roleread = () => {
 
 
   // Delete role
- const handleDelete = async (roleId) => {
-   if (window.confirm("Are you sure you want to delete this role?")) {
-     try {
-       await axios.delete(`http://localhost:5000/api/role/delete/${roleId}`);
-       toast.success("Role deleted successfully!");
-       setRoles(roles.filter((role) => role._id !== roleId));
-     } catch (error) {
-       if (error.response && error.response.status === 400) {
-         toast.error(
-           "This role is currently assigned to a staff member and cannot be deleted."
-         );
-       } else {
-         console.error("Error deleting role:", error);
-         toast.error("An error occurred while deleting the role.");
-       }
-     }
-   }
- };
-
+  const handleDelete = async (roleId) => {
+    if (window.confirm("Are you sure you want to delete this role?")) {
+      try {
+        // First, check if the role is assigned to a staff member
+        const roleResponse = await axios.get(`http://localhost:5000/api/role/${roleId}`);
+        const role = roleResponse.data;
+  
+        // If the role is assigned to a staff member, prevent deletion
+        if (role.assignedToStaff && role.assignedToStaff.length > 0) {
+          toast.error("This role is currently assigned to a staff member and cannot be deleted.");
+          return; // Stop further deletion process
+        }
+  
+        // If the role is not assigned to anyone, proceed with deletion
+        await axios.delete(`http://localhost:5000/api/role/delete/${roleId}`);
+        toast.success("Role deleted successfully!");
+  
+        setRoles(roles.filter((role) => role._id !== roleId)); // Update local state
+      } catch (error) {
+        // Handle errors if any
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.error(error.response.data.message); // Show the error message from the server
+        } else {
+          console.error("Error deleting role:", error);
+          toast.error("An error occurred while deleting the role.");
+        }
+      }
+    }
+  };
+  
+  
 
   // Open modal for adding or updating a role
   const openModal = (role = null) => {

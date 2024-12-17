@@ -62,33 +62,49 @@ const Staffread = () => {
 
   // Handle input changes
 
+  // Handle Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // If the CNIC field, allow only 13 characters
+    
+    // Log to check the changes
+    console.log(name, value); 
+  
+    // Allow only numeric input for CNIC and Phone
+    if ((name === "cnic" || name === "phone") && !/^\d*$/.test(value)) {
+      return; // Ignore invalid input
+    }
+  
+    // Phone number validation: starts with 03 and then 9 digits
+    if (name === "phone") {
+      if (value.length > 11) return; // Restrict phone length to 11 digits
+      if (value && !/^03\d{9}$/.test(value)) {
+        return; // Phone must start with "03" and have 9 digits after that
+      }
+    }
+  
+    // CNIC validation: exactly 13 digits
     if (name === "cnic" && value.length > 13) {
-      return; // Prevent further input if length exceeds 13
+      return; // Restrict CNIC length to 13 digits
     }
-    if (name === "phone" && value.length > 11) {
-      return; // Prevent further input if length exceeds 13
-    }
+  
+    // Update the state with valid input
     setStaffData({ ...staffData, [name]: value });
   };
+  
 
-  // Add new staff
-  // Add new staff
-  // Add Staff with Field-Specific Error Handling
+
+
   // Add Staff with Validation
   const addStaff = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
-    if (staffData.phone.length !== 11) {
-      toast.error("Phone number must be 11 digits");
+    // Validation for CNIC and Phone
+    if (!/^\d{13}$/.test(staffData.cnic)) {
+      toast.error("CNIC must be exactly 13 digits and numeric.");
       return;
     }
-    if (staffData.cnic.length !== 13) {
-      toast.error("CNIC must be 13 digits");
+    if (!/^\d{11}$/.test(staffData.phone)) {
+      toast.error("Phone number must be exactly 11 digits and numeric.");
       return;
     }
 
@@ -117,7 +133,7 @@ const Staffread = () => {
       } else {
         toast.error(
           error.response?.data?.message ||
-            "An unexpected error occurred while creating the staff."
+          "An unexpected error occurred while creating the staff."
         );
       }
     }
@@ -127,13 +143,13 @@ const Staffread = () => {
   const updateStaff = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
-    if (staffData.phone.length !== 11) {
-      toast.error("Phone number must be 11 digits");
+    // Validation for CNIC and Phone
+    if (!/^\d{13}$/.test(staffData.cnic)) {
+      toast.error("CNIC must be exactly 13 digits and numeric.");
       return;
     }
-    if (staffData.cnic.length !== 13) {
-      toast.error("CNIC must be 13 digits");
+    if (!/^\d{11}$/.test(staffData.phone)) {
+      toast.error("Phone number must be exactly 11 digits and numeric.");
       return;
     }
 
@@ -167,11 +183,12 @@ const Staffread = () => {
       } else {
         toast.error(
           error.response?.data?.message ||
-            "An unexpected error occurred while updating the staff."
+          "An unexpected error occurred while updating the staff."
         );
       }
     }
   };
+
 
   // Delete staff
   const handleDelete = async (staffId) => {
@@ -184,7 +201,7 @@ const Staffread = () => {
         console.error("Error deleting staff:", error);
         toast.error(
           error.response?.data?.message ||
-            "An error occurred while deleting the staff."
+          "An error occurred while deleting the staff."
         );
       }
     }
@@ -399,10 +416,11 @@ const Staffread = () => {
                       className="form-control"
                       id="phone"
                       name="phone"
-                      value={staffData.phone}
+                      value={staffData.phone}  // Ensure this is correctly bound to the state
                       onChange={handleChange}
                       required
                     />
+
                   </div>
                   <div className="mb-3">
                     <label className="form-label" htmlFor="cnic">

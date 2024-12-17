@@ -26,16 +26,16 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/Adminread" element={<Adminread />} />
-              <Route path="/Roleread" element={<Roleread />} />
-              <Route path="/Staffread" element={<Staffread />} />
-              <Route path="/Guestread" element={<Guestread />} />
+              <Route path="/Admin" element={<Adminread />} />
+              <Route path="/Role" element={<Roleread />} />
+              <Route path="/Staff" element={<Staffread />} />
+              <Route path="/Guest" element={<Guestread />} />
               <Route path="/Roomtype" element={<Roomtype />} />
-              <Route path="/Roomread" element={<Roomread />} />
-              <Route path="/Floorread" element={<Floorread />} />
-              <Route path="/Foodread" element={<Foodread />} />
-              <Route path="/Laundryread" element={<LaundryRead />} />
-              <Route path="/Feedbackread" element={<Feedbackread />} />
+              <Route path="/Room" element={<Roomread />} />
+              <Route path="/Floor" element={<Floorread />} />
+              <Route path="/Food" element={<Foodread />} />
+              <Route path="/Laundry" element={<LaundryRead />} />
+              <Route path="/Feedback" element={<Feedbackread />} />
             </Routes>
           </div>
         </div>
